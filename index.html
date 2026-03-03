@@ -2428,18 +2428,19 @@ body {
     </div>
     <div class="accent-line"></div>
 
-    <div class="scoring-mode-banner">
-      <span class="icon">&#x1F504;</span>
-      <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
-    </div>
-
     <div class="edu-intro" style="max-width:720px; margin:0 auto 20px;">
       The Composite Score is calculated as: <strong>FIT &times; weight + SIGNALS &times; weight + TIMING &times; weight = Score (0-100)</strong>. Adjust the weights to reflect what may matter most to Panopto's prioritization.
     </div>
 
-    <div class="additive-banner" style="text-align:left; max-width:720px; margin:0 auto 20px;">
-      <span class="icon">&#x2795;</span>
-      <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+    <div style="display:flex; gap:16px; max-width:720px; margin:0 auto 20px;">
+      <div class="scoring-mode-banner" style="flex:1; margin:0;">
+        <span class="icon">&#x1F504;</span>
+        <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
+      </div>
+      <div class="additive-banner" style="flex:1; margin:0; text-align:left;">
+        <span class="icon">&#x2795;</span>
+        <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+      </div>
     </div>
 
     <div class="dual-columns" id="weights-columns"></div>
