@@ -1212,16 +1212,19 @@ body {
 }
 
 .ownership-btn {
-  padding: 8px 20px;
+  padding: 8px 12px;
   border-radius: 6px;
   border: none;
   background: transparent;
   font-family: 'Syne', sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
   transition: all var(--transition);
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .ownership-btn.active {
@@ -2073,6 +2076,7 @@ body {
                   <input type="range" id="universe-loc-min" min="0" max="100" step="5" value="0" class="loc-slider">
                   <span id="universe-loc-display" style="font-family:'Instrument Sans'; font-size:16px; font-weight:700; color:var(--teal-deep); min-width:60px; text-align:right; font-variant-numeric:tabular-nums;">0+</span>
                 </div>
+                <div class="control-label" style="margin-top:4px; font-size:16px;">locations</div>
                 <div class="control-hint" style="margin-top:8px;">Set to 0 to include all accounts regardless of location count. Source: ZoomInfo location count.</div>
               </div>
             </div>
@@ -2169,7 +2173,7 @@ body {
 
     <div class="step-nav">
       <button class="btn btn-secondary" onclick="goToLanding()">&#8592; Back</button>
-      <button class="btn btn-primary" id="universe-continue-btn" onclick="nextStep()" disabled>Continue to FIT &#8594;</button>
+      <span id="universe-continue-wrap" title="Manufacturing needs ~500 accounts to continue." style="cursor:not-allowed;"><button class="btn btn-primary" id="universe-continue-btn" onclick="nextStep()" disabled style="pointer-events:none;">Continue to FIT &#8594;</button></span>
     </div>
   </div>
 
@@ -2741,6 +2745,7 @@ function applyUniverseFilters() {
   const locCol = findColumn(data, 'locations', 'location');
   const ownCol = findColumn(data, 'ownership', 'type');
   let count = 0;
+  let pubPass = 0, privPass = 0, otherPass = 0;
   const total = data.length;
   data.forEach(row => {
     let pass = true;
@@ -2769,8 +2774,20 @@ function applyUniverseFilters() {
       if (cfg.ownership === 'public' && !own.includes('public')) pass = false;
       if (cfg.ownership === 'private' && !own.includes('private')) pass = false;
     }
-    if (pass) count++;
+    if (pass) {
+      count++;
+      if (cfg.ownership === 'weighted' && ownCol) {
+        const own = (row[ownCol] || '').toLowerCase();
+        if (own.includes('public')) pubPass++;
+        else if (own.includes('private')) privPass++;
+        else otherPass++;
+      }
+    }
   });
+  // Custom Mix: weight public/private proportionally, unknown ownership passes through
+  if (cfg.ownership === 'weighted') {
+    count = Math.round(pubPass * cfg.ownershipMix / 100) + Math.round(privPass * (100 - cfg.ownershipMix) / 100) + otherPass;
+  }
   document.getElementById('counter-value').textContent = fmt(count);
   document.getElementById('counter-total').textContent = fmt(total);
   const target = document.getElementById('counter-target');
@@ -2781,10 +2798,15 @@ function applyUniverseFilters() {
 
   // Gate Continue button: enable only when count is within 25% of 500 (375-625)
   const continueBtn = document.getElementById('universe-continue-btn');
+  const continueWrap = document.getElementById('universe-continue-wrap');
   if (continueBtn) {
     const inRange = count >= 375 && count <= 625;
     continueBtn.disabled = !inRange;
-    continueBtn.title = inRange ? '' : `Adjust filters to reach ~500 accounts (currently ${fmt(count)})`;
+    continueBtn.style.pointerEvents = inRange ? 'auto' : 'none';
+    if (continueWrap) {
+      continueWrap.title = inRange ? '' : `Manufacturing needs ~500 accounts to continue (currently ${fmt(count)}).`;
+      continueWrap.style.cursor = inRange ? 'auto' : 'not-allowed';
+    }
   }
 }
 
