@@ -1035,6 +1035,126 @@ body {
 .tier-badge.c { background: rgba(130, 130, 130, 0.12); color: var(--grade-c); }
 
 /* ================================================================
+   DATA COVERAGE DASHBOARD
+   ================================================================ */
+.data-coverage-dashboard {
+  background: var(--light-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.data-coverage-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.coverage-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.coverage-row:last-child { margin-bottom: 0; }
+
+.coverage-label {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.coverage-bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--light-bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.coverage-bar-fill {
+  height: 100%;
+  background: var(--teal-primary);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.coverage-stat {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 140px;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================================
+   UNKNOWN-HANDLING TOGGLE (segmented control)
+   ================================================================ */
+.unknown-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--light-bg);
+  border-radius: 6px;
+  padding: 2px;
+  margin-top: 10px;
+}
+
+.unknown-toggle-btn {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.unknown-toggle-btn:hover { color: var(--text-secondary); }
+
+.unknown-toggle-btn.active {
+  background: var(--light-surface);
+  color: var(--teal-deep);
+  box-shadow: var(--shadow-sm);
+}
+
+.unknown-handling-hint {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.estimated-value {
+  font-style: italic;
+  color: #D97706;
+}
+
+.counter-breakdown {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  margin-left: 4px;
+}
+
+/* ================================================================
    UNIVERSE NARROWING FILTERS
    ================================================================ */
 .filter-section {
@@ -2006,6 +2126,12 @@ body {
           <span class="target-indicator" id="counter-target">Target: ~500</span>
         </div>
 
+        <!-- Data Coverage Dashboard -->
+        <div id="data-coverage-dashboard" class="data-coverage-dashboard" style="display:none;">
+          <div class="data-coverage-title">Data Coverage</div>
+          <div id="coverage-rows"></div>
+        </div>
+
         <!-- Loading state -->
         <div id="universe-loading" class="loading-overlay">
           <div class="spinner"></div>
@@ -2037,6 +2163,13 @@ body {
                   <span>25,000</span>
                 </div>
               </div>
+              <div class="control-label" style="font-size:14px; margin-top:8px;">Accounts with no employee data:</div>
+              <div class="unknown-toggle" id="unknown-emp-toggle">
+                <button class="unknown-toggle-btn active" data-value="include" onclick="setUnknownHandling('employees', 'include', this)">Include</button>
+                <button class="unknown-toggle-btn" data-value="exclude" onclick="setUnknownHandling('employees', 'exclude', this)">Exclude</button>
+                <button class="unknown-toggle-btn" data-value="estimate" onclick="setUnknownHandling('employees', 'estimate', this)">Estimate</button>
+              </div>
+              <div class="unknown-handling-hint" id="unknown-emp-hint">Accounts with no employee data pass through this filter.</div>
             </div>
           </div>
 
@@ -2063,6 +2196,13 @@ body {
                   <span>$5B+</span>
                 </div>
               </div>
+              <div class="control-label" style="font-size:14px; margin-top:8px;">Accounts with no revenue data:</div>
+              <div class="unknown-toggle" id="unknown-rev-toggle">
+                <button class="unknown-toggle-btn active" data-value="include" onclick="setUnknownHandling('revenue', 'include', this)">Include</button>
+                <button class="unknown-toggle-btn" data-value="exclude" onclick="setUnknownHandling('revenue', 'exclude', this)">Exclude</button>
+                <button class="unknown-toggle-btn" data-value="estimate" onclick="setUnknownHandling('revenue', 'estimate', this)">Estimate</button>
+              </div>
+              <div class="unknown-handling-hint" id="unknown-rev-hint">Accounts with no revenue data pass through this filter.</div>
             </div>
           </div>
 
@@ -2078,6 +2218,13 @@ body {
                 </div>
                 <div class="control-label" style="margin-top:4px; font-size:16px;">locations</div>
                 <div class="control-hint" style="margin-top:8px;">Set to 0 to include all accounts regardless of location count. Source: ZoomInfo location count.</div>
+                <div class="control-label" style="font-size:14px; margin-top:8px;">Accounts with no location data:</div>
+                <div class="unknown-toggle" id="unknown-loc-toggle">
+                  <button class="unknown-toggle-btn active" data-value="include" onclick="setUnknownHandling('locations', 'include', this)">Include</button>
+                  <button class="unknown-toggle-btn" data-value="exclude" onclick="setUnknownHandling('locations', 'exclude', this)">Exclude</button>
+                  <button class="unknown-toggle-btn" data-value="estimate" onclick="setUnknownHandling('locations', 'estimate', this)">Estimate</button>
+                </div>
+                <div class="unknown-handling-hint" id="unknown-loc-hint">Accounts with no location data pass through this filter.</div>
               </div>
             </div>
             <div class="card">
@@ -2440,8 +2587,15 @@ let universeConfig = {
   revenueMax: 5,
   locationsMin: 0,
   ownership: 'both',
-  ownershipMix: 50
+  ownershipMix: 50,
+  unknownHandling: {
+    employees: 'include',
+    revenue: 'include',
+    locations: 'include'
+  }
 };
+
+let subIndustryMedians = {};
 
 let universeData = [];
 let universeLoaded = false;
@@ -2557,10 +2711,13 @@ async function loadMfgUniverse() {
     const data = await fetchUniverseData(MFG_GID);
     universeData = data;
     universeLoaded = true;
+    subIndustryMedians = computeSubIndustryMedians(data);
     loading.style.display = 'none';
     filters.style.display = 'block';
     buildUniverseFilters(data);
+    buildDataCoverageDashboard(data);
     syncOwnershipDOM();
+    syncUnknownHandlingDOM();
     applyUniverseFilters();
   } catch (e) {
     loading.style.display = 'none';
@@ -2568,9 +2725,12 @@ async function loadMfgUniverse() {
     const fallbackData = generateFallbackData();
     universeData = fallbackData;
     universeLoaded = true;
+    subIndustryMedians = computeSubIndustryMedians(fallbackData);
     filters.style.display = 'block';
     buildUniverseFilters(fallbackData);
+    buildDataCoverageDashboard(fallbackData);
     syncOwnershipDOM();
+    syncUnknownHandlingDOM();
     applyUniverseFilters();
     const notice = document.createElement('div');
     notice.className = 'info-callout';
@@ -2732,6 +2892,131 @@ function toggleSubIndustry(checkbox) {
 }
 
 // =====================================================================
+// SUB-INDUSTRY MEDIANS COMPUTATION
+// =====================================================================
+
+function computeSubIndustryMedians(data) {
+  const subCol = findColumn(data, 'sub-industry', 'subindustry', 'sub industry');
+  const empCol = findColumn(data, 'employees', 'employee');
+  const revCol = findColumn(data, 'revenue');
+  const locCol = findColumn(data, 'locations', 'location');
+  const buckets = {};
+  data.forEach(row => {
+    const sub = subCol ? (row[subCol] || 'Unknown') : 'Unknown';
+    if (!buckets[sub]) buckets[sub] = { employees: [], revenue: [], locations: [] };
+    if (empCol) {
+      const emp = parseInt(String(row[empCol]).replace(/,/g, '')) || 0;
+      if (emp > 0) buckets[sub].employees.push(emp);
+    }
+    if (revCol) {
+      const rev = parseRevenue(row[revCol]);
+      if (rev > 0) buckets[sub].revenue.push(rev);
+    }
+    if (locCol) {
+      const loc = parseInt(String(row[locCol]).replace(/,/g, '')) || 0;
+      if (loc > 0) buckets[sub].locations.push(loc);
+    }
+  });
+  const median = arr => {
+    if (arr.length === 0) return 0;
+    const sorted = arr.slice().sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 !== 0 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+  };
+  const result = {};
+  for (const [sub, vals] of Object.entries(buckets)) {
+    result[sub] = {
+      employees: median(vals.employees),
+      revenue: median(vals.revenue),
+      locations: median(vals.locations)
+    };
+  }
+  return result;
+}
+
+// =====================================================================
+// DATA COVERAGE DASHBOARD
+// =====================================================================
+
+function buildDataCoverageDashboard(data) {
+  const dashboard = document.getElementById('data-coverage-dashboard');
+  const container = document.getElementById('coverage-rows');
+  if (!dashboard || !container) return;
+
+  const empCol = findColumn(data, 'employees', 'employee');
+  const revCol = findColumn(data, 'revenue');
+  const locCol = findColumn(data, 'locations', 'location');
+  const webCol = findColumn(data, 'website');
+  const total = data.length;
+
+  const fields = [];
+  if (empCol) {
+    const count = data.filter(r => { const v = parseInt(String(r[empCol]).replace(/,/g, '')) || 0; return v > 0; }).length;
+    fields.push({ label: 'Employees', count, total });
+  }
+  if (revCol) {
+    const count = data.filter(r => parseRevenue(r[revCol]) > 0).length;
+    fields.push({ label: 'Revenue', count, total });
+  }
+  if (locCol) {
+    const count = data.filter(r => { const v = parseInt(String(r[locCol]).replace(/,/g, '')) || 0; return v > 0; }).length;
+    fields.push({ label: 'Locations', count, total });
+  }
+  if (webCol) {
+    const count = data.filter(r => (r[webCol] || '').trim().length > 0).length;
+    fields.push({ label: 'Website', count, total });
+  }
+
+  container.innerHTML = fields.map(f => {
+    const pct = total > 0 ? (f.count / total * 100).toFixed(1) : 0;
+    return `<div class="coverage-row">
+      <span class="coverage-label">${f.label}</span>
+      <div class="coverage-bar-track"><div class="coverage-bar-fill" style="width:${pct}%"></div></div>
+      <span class="coverage-stat">${fmt(f.count)} of ${fmt(f.total)} (${pct}%)</span>
+    </div>`;
+  }).join('');
+
+  dashboard.style.display = 'block';
+}
+
+// =====================================================================
+// UNKNOWN-HANDLING TOGGLE
+// =====================================================================
+
+function setUnknownHandling(field, value, btn) {
+  if (!universeConfig.unknownHandling) {
+    universeConfig.unknownHandling = { employees: 'include', revenue: 'include', locations: 'include' };
+  }
+  universeConfig.unknownHandling[field] = value;
+  btn.parentElement.querySelectorAll('.unknown-toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const hints = {
+    employees: { include: 'Accounts with no employee data pass through this filter.', exclude: 'Accounts with no employee data are filtered out.', estimate: 'Sub-industry median employee count used for filtering (marked with ~).' },
+    revenue: { include: 'Accounts with no revenue data pass through this filter.', exclude: 'Accounts with no revenue data are filtered out.', estimate: 'Sub-industry median revenue used for filtering (marked with ~).' },
+    locations: { include: 'Accounts with no location data pass through this filter.', exclude: 'Accounts with no location data are filtered out.', estimate: 'Sub-industry median location count used for filtering (marked with ~).' }
+  };
+  const fieldMap = { employees: 'emp', revenue: 'rev', locations: 'loc' };
+  const hintEl = document.getElementById('unknown-' + fieldMap[field] + '-hint');
+  if (hintEl) hintEl.textContent = hints[field][value];
+
+  applyUniverseFilters();
+}
+
+function syncUnknownHandlingDOM() {
+  if (!universeConfig.unknownHandling) return;
+  const fieldMap = { employees: 'emp', revenue: 'rev', locations: 'loc' };
+  for (const [field, val] of Object.entries(universeConfig.unknownHandling)) {
+    const toggle = document.getElementById('unknown-' + fieldMap[field] + '-toggle');
+    if (toggle) {
+      toggle.querySelectorAll('.unknown-toggle-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.value === val);
+      });
+    }
+  }
+}
+
+// =====================================================================
 // UNIVERSE FILTERING
 // =====================================================================
 
@@ -2739,35 +3024,84 @@ function applyUniverseFilters() {
   if (!universeLoaded) return;
   const data = universeData;
   const cfg = universeConfig;
+  const handling = cfg.unknownHandling || { employees: 'include', revenue: 'include', locations: 'include' };
   const subCol = findColumn(data, 'sub-industry', 'subindustry', 'sub industry');
   const empCol = findColumn(data, 'employees', 'employee');
   const revCol = findColumn(data, 'revenue');
   const locCol = findColumn(data, 'locations', 'location');
   const ownCol = findColumn(data, 'ownership', 'type');
   let count = 0;
+  let verifiedCount = 0;
+  let estimatedCount = 0;
   let pubPass = 0, privPass = 0, otherPass = 0;
   const total = data.length;
   data.forEach(row => {
     let pass = true;
+    let usedEstimate = false;
+    delete row._estimatedEmployees;
+    delete row._estimatedRevenue;
+    delete row._estimatedLocations;
+    delete row._dataConfidence;
+
     if (subCol && cfg.subIndustries.length > 0) {
       const sub = row[subCol] || 'Unknown';
       if (!cfg.subIndustries.includes(sub)) pass = false;
     }
     if (pass && empCol) {
       const emp = parseInt(String(row[empCol]).replace(/,/g, '')) || 0;
-      if (emp > 0 && (emp < cfg.employeeMin || emp > cfg.employeeMax)) pass = false;
+      if (emp === 0) {
+        if (handling.employees === 'exclude') {
+          pass = false;
+        } else if (handling.employees === 'estimate') {
+          const subInd = subCol ? (row[subCol] || 'Unknown') : 'Unknown';
+          const estimated = subIndustryMedians[subInd]?.employees || 0;
+          if (estimated > 0) {
+            if (estimated < cfg.employeeMin || estimated > cfg.employeeMax) pass = false;
+            else usedEstimate = true;
+            row._estimatedEmployees = estimated;
+          }
+        }
+      } else if (emp < cfg.employeeMin || emp > cfg.employeeMax) {
+        pass = false;
+      }
     }
     if (pass && revCol) {
       const rev = parseRevenue(row[revCol]);
-      if (rev > 0) {
-        const minRev = REVENUE_BRACKETS[cfg.revenueMin] ? REVENUE_BRACKETS[cfg.revenueMin].min : 0;
-        const maxRev = REVENUE_BRACKETS[cfg.revenueMax] ? REVENUE_BRACKETS[cfg.revenueMax].max : Infinity;
-        if (rev < minRev || rev > maxRev) pass = false;
+      const minRev = REVENUE_BRACKETS[cfg.revenueMin] ? REVENUE_BRACKETS[cfg.revenueMin].min : 0;
+      const maxRev = REVENUE_BRACKETS[cfg.revenueMax] ? REVENUE_BRACKETS[cfg.revenueMax].max : Infinity;
+      if (rev === 0) {
+        if (handling.revenue === 'exclude') {
+          pass = false;
+        } else if (handling.revenue === 'estimate') {
+          const subInd = subCol ? (row[subCol] || 'Unknown') : 'Unknown';
+          const estimated = subIndustryMedians[subInd]?.revenue || 0;
+          if (estimated > 0) {
+            if (estimated < minRev || estimated > maxRev) pass = false;
+            else usedEstimate = true;
+            row._estimatedRevenue = estimated;
+          }
+        }
+      } else if (rev < minRev || rev > maxRev) {
+        pass = false;
       }
     }
     if (pass && locCol && cfg.locationsMin > 0) {
       const loc = parseInt(String(row[locCol]).replace(/,/g, '')) || 0;
-      if (loc > 0 && loc < cfg.locationsMin) pass = false;
+      if (loc === 0) {
+        if (handling.locations === 'exclude') {
+          pass = false;
+        } else if (handling.locations === 'estimate') {
+          const subInd = subCol ? (row[subCol] || 'Unknown') : 'Unknown';
+          const estimated = subIndustryMedians[subInd]?.locations || 0;
+          if (estimated > 0) {
+            if (estimated < cfg.locationsMin) pass = false;
+            else usedEstimate = true;
+            row._estimatedLocations = estimated;
+          }
+        }
+      } else if (loc < cfg.locationsMin) {
+        pass = false;
+      }
     }
     if (pass && ownCol && cfg.ownership !== 'both' && cfg.ownership !== 'weighted') {
       const own = (row[ownCol] || '').toLowerCase();
@@ -2776,6 +3110,19 @@ function applyUniverseFilters() {
     }
     if (pass) {
       count++;
+      if (usedEstimate) {
+        estimatedCount++;
+        row._dataConfidence = 'Estimated';
+      } else {
+        const empVal = empCol ? (parseInt(String(row[empCol]).replace(/,/g, '')) || 0) : -1;
+        const revVal = revCol ? parseRevenue(row[revCol]) : -1;
+        const locVal = locCol ? (parseInt(String(row[locCol]).replace(/,/g, '')) || 0) : -1;
+        const hasUnknown = (empVal === 0 && handling.employees === 'include') ||
+                           (revVal === 0 && handling.revenue === 'include') ||
+                           (locVal === 0 && handling.locations === 'include');
+        row._dataConfidence = hasUnknown ? 'Unknown' : 'Verified';
+        verifiedCount++;
+      }
       if (cfg.ownership === 'weighted' && ownCol) {
         const own = (row[ownCol] || '').toLowerCase();
         if (own.includes('public')) pubPass++;
@@ -2790,6 +3137,24 @@ function applyUniverseFilters() {
   }
   document.getElementById('counter-value').textContent = fmt(count);
   document.getElementById('counter-total').textContent = fmt(total);
+
+  // Show breakdown if any estimates are in use
+  const anyEstimate = handling.employees === 'estimate' || handling.revenue === 'estimate' || handling.locations === 'estimate';
+  const counterEl = document.getElementById('universe-counter');
+  let breakdownEl = document.getElementById('counter-breakdown');
+  if (anyEstimate && estimatedCount > 0) {
+    if (!breakdownEl) {
+      breakdownEl = document.createElement('span');
+      breakdownEl.id = 'counter-breakdown';
+      breakdownEl.className = 'counter-breakdown';
+      counterEl.appendChild(breakdownEl);
+    }
+    breakdownEl.textContent = `(${fmt(verifiedCount)} verified + ${fmt(estimatedCount)} estimated)`;
+    breakdownEl.style.display = '';
+  } else if (breakdownEl) {
+    breakdownEl.style.display = 'none';
+  }
+
   const target = document.getElementById('counter-target');
   const pct = Math.abs(count - 500) / 500;
   if (pct <= 0.1) { target.className = 'target-indicator target-green'; target.textContent = `${fmt(count)} ~ Target: ~500`; }
@@ -3608,10 +3973,11 @@ function buildSummaryText() {
     text += `=== ${name} ===\n\n`;
 
     if (seg === 'mfg') {
+      const uh = universeConfig.unknownHandling || {};
       text += `UNIVERSE NARROWING\n`;
-      text += `  Employee Range: ${fmt(universeConfig.employeeMin)} - ${fmt(universeConfig.employeeMax)}\n`;
-      text += `  Revenue: ${REVENUE_BRACKETS[universeConfig.revenueMin]?.label || 'All'} to ${REVENUE_BRACKETS[universeConfig.revenueMax]?.label || 'All'}\n`;
-      text += `  Min Locations: ${universeConfig.locationsMin === 0 ? 'No minimum' : universeConfig.locationsMin + '+'}\n`;
+      text += `  Employee Range: ${fmt(universeConfig.employeeMin)} - ${fmt(universeConfig.employeeMax)} (unknowns: ${uh.employees || 'include'})\n`;
+      text += `  Revenue: ${REVENUE_BRACKETS[universeConfig.revenueMin]?.label || 'All'} to ${REVENUE_BRACKETS[universeConfig.revenueMax]?.label || 'All'} (unknowns: ${uh.revenue || 'include'})\n`;
+      text += `  Min Locations: ${universeConfig.locationsMin === 0 ? 'No minimum' : universeConfig.locationsMin + '+'} (unknowns: ${uh.locations || 'include'})\n`;
       text += `  Ownership: ${universeConfig.ownership === 'both' ? 'Public & Private' : universeConfig.ownership === 'weighted' ? `Custom Mix (${universeConfig.ownershipMix}% Public / ${100 - universeConfig.ownershipMix}% Private)` : universeConfig.ownership}\n\n`;
     }
 
@@ -3655,7 +4021,21 @@ function copySummary() {
 
 function downloadConfig() {
   syncFromDOM();
-  const data = { timestamp: new Date().toISOString(), mfg: config.mfg, fin: config.fin, universe: universeConfig };
+  const nameCol = findColumn(universeData, 'company', 'name', 'company name');
+  const accounts = universeData.filter(r => r._dataConfidence).map(r => ({
+    company: nameCol ? r[nameCol] : 'Unknown',
+    data_confidence: r._dataConfidence || 'Unknown',
+    estimated_employees: r._estimatedEmployees || null,
+    estimated_revenue: r._estimatedRevenue || null,
+    estimated_locations: r._estimatedLocations || null
+  }));
+  const data = {
+    timestamp: new Date().toISOString(),
+    mfg: config.mfg,
+    fin: config.fin,
+    universe: universeConfig,
+    matching_accounts: accounts
+  };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3750,7 +4130,8 @@ function resetDefaults() {
     revenueMax: 5,
     locationsMin: 0,
     ownership: 'both',
-    ownershipMix: 50
+    ownershipMix: 50,
+    unknownHandling: { employees: 'include', revenue: 'include', locations: 'include' }
   };
 
   // Reset universe DOM elements
@@ -3794,6 +4175,9 @@ function resetDefaults() {
   document.querySelectorAll('#universe-filters input[type="checkbox"]').forEach(cb => {
     cb.checked = true;
   });
+
+  // Reset unknown handling toggles
+  syncUnknownHandlingDOM();
 
   // Re-apply filters with reset values
   if (universeLoaded) applyUniverseFilters();
