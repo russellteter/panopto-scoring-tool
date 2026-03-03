@@ -1230,6 +1230,63 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+.ownership-btn .btn-count {
+  display: block;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.ownership-btn.active .btn-count {
+  color: var(--teal-primary);
+}
+
+.ownership-mix-slider {
+  margin-top: 14px;
+  display: none;
+}
+.ownership-mix-slider.visible { display: block; }
+.ownership-mix-slider .mix-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.ownership-mix-slider .mix-value {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--teal-primary);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.ownership-mix-slider input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--teal-primary) 0%, var(--teal-primary) var(--pct, 50%), rgba(255,255,255,0.15) var(--pct, 50%), rgba(255,255,255,0.15) 100%);
+  outline: none;
+}
+.ownership-mix-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--teal-primary);
+  cursor: pointer;
+  box-shadow: 0 0 4px rgba(30,212,194,0.4);
+}
+.ownership-mix-slider .mix-endpoints {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
 /* Dual-handle slider (for universe narrowing) */
 .dual-slider {
   position: relative;
@@ -1896,9 +1953,18 @@ body {
                 <div class="control-label">Include:</div>
                 <div class="control-hint">Source: ZoomInfo company type classification.</div>
                 <div class="ownership-toggle" style="margin-top:8px;">
-                  <button class="ownership-btn active" data-value="both" onclick="setOwnership('both', this)">Both</button>
-                  <button class="ownership-btn" data-value="public" onclick="setOwnership('public', this)">Public</button>
-                  <button class="ownership-btn" data-value="private" onclick="setOwnership('private', this)">Private</button>
+                  <button class="ownership-btn active" data-value="both" onclick="setOwnership('both', this)">Both<span class="btn-count" id="own-count-both">--</span></button>
+                  <button class="ownership-btn" data-value="public" onclick="setOwnership('public', this)">Public<span class="btn-count" id="own-count-public">--</span></button>
+                  <button class="ownership-btn" data-value="private" onclick="setOwnership('private', this)">Private<span class="btn-count" id="own-count-private">--</span></button>
+                  <button class="ownership-btn" data-value="weighted" onclick="setOwnership('weighted', this)">Custom Mix<span class="btn-count" id="own-count-weighted">&nbsp;</span></button>
+                </div>
+                <div class="ownership-mix-slider" id="ownership-mix-panel">
+                  <div class="mix-value" id="mix-value-display">50% Public / 50% Private</div>
+                  <input type="range" min="0" max="100" value="50" id="ownership-mix-range" oninput="updateOwnershipMix(this.value)">
+                  <div class="mix-endpoints">
+                    <span>100% Private</span>
+                    <span>100% Public</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2240,7 +2306,8 @@ let universeConfig = {
   revenueMin: 0,
   revenueMax: 5,
   locationsMin: 0,
-  ownership: 'both'
+  ownership: 'both',
+  ownershipMix: 50
 };
 
 let universeData = [];
@@ -2360,6 +2427,7 @@ async function loadMfgUniverse() {
     loading.style.display = 'none';
     filters.style.display = 'block';
     buildUniverseFilters(data);
+    syncOwnershipDOM();
     applyUniverseFilters();
   } catch (e) {
     loading.style.display = 'none';
@@ -2369,6 +2437,7 @@ async function loadMfgUniverse() {
     universeLoaded = true;
     filters.style.display = 'block';
     buildUniverseFilters(fallbackData);
+    syncOwnershipDOM();
     applyUniverseFilters();
     const notice = document.createElement('div');
     notice.className = 'info-callout';
@@ -2376,6 +2445,23 @@ async function loadMfgUniverse() {
     notice.innerHTML = '<span class="icon">&#x2139;</span><span>Using representative data for preview. Live account data loads when served via HTTPS.</span>';
     filters.insertBefore(notice, filters.firstChild);
   }
+}
+
+function syncOwnershipDOM() {
+  // Sync ownership buttons with restored state
+  document.querySelectorAll('.ownership-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === universeConfig.ownership);
+  });
+  // Sync mix slider
+  const mixPanel = document.getElementById('ownership-mix-panel');
+  if (mixPanel) mixPanel.classList.toggle('visible', universeConfig.ownership === 'weighted');
+  const mixRange = document.getElementById('ownership-mix-range');
+  if (mixRange) {
+    mixRange.value = universeConfig.ownershipMix;
+    mixRange.style.setProperty('--pct', universeConfig.ownershipMix + '%');
+  }
+  const mixDisplay = document.getElementById('mix-value-display');
+  if (mixDisplay) mixDisplay.textContent = `${universeConfig.ownershipMix}% Public / ${100 - universeConfig.ownershipMix}% Private`;
 }
 
 function generateFallbackData() {
@@ -2425,6 +2511,22 @@ function generateFallbackData() {
 // =====================================================================
 
 function buildUniverseFilters(data) {
+  // Compute ownership counts
+  const ownCol = findColumn(data, 'ownership', 'type');
+  if (ownCol) {
+    let pubCount = 0, privCount = 0;
+    data.forEach(row => {
+      const own = (row[ownCol] || '').toLowerCase();
+      if (own.includes('public')) pubCount++;
+      else if (own.includes('private')) privCount++;
+    });
+    const totalCount = data.length;
+    const el = (id, txt) => { const e = document.getElementById(id); if (e) e.textContent = txt; };
+    el('own-count-both', fmt(totalCount));
+    el('own-count-public', fmt(pubCount));
+    el('own-count-private', fmt(privCount));
+  }
+
   const subCol = findColumn(data, 'sub-industry', 'subindustry', 'sub industry');
   if (!subCol) return;
   const subCounts = {};
@@ -2533,7 +2635,7 @@ function applyUniverseFilters() {
       const loc = parseInt(String(row[locCol]).replace(/,/g, '')) || 0;
       if (loc > 0 && loc < cfg.locationsMin) pass = false;
     }
-    if (pass && ownCol && cfg.ownership !== 'both') {
+    if (pass && ownCol && cfg.ownership !== 'both' && cfg.ownership !== 'weighted') {
       const own = (row[ownCol] || '').toLowerCase();
       if (cfg.ownership === 'public' && !own.includes('public')) pass = false;
       if (cfg.ownership === 'private' && !own.includes('private')) pass = false;
@@ -2561,6 +2663,18 @@ function setOwnership(val, btn) {
   universeConfig.ownership = val;
   btn.parentElement.querySelectorAll('.ownership-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  const mixPanel = document.getElementById('ownership-mix-panel');
+  if (mixPanel) mixPanel.classList.toggle('visible', val === 'weighted');
+  applyUniverseFilters();
+}
+
+function updateOwnershipMix(val) {
+  val = parseInt(val);
+  universeConfig.ownershipMix = val;
+  const display = document.getElementById('mix-value-display');
+  const slider = document.getElementById('ownership-mix-range');
+  if (display) display.textContent = `${val}% Public / ${100 - val}% Private`;
+  if (slider) slider.style.setProperty('--pct', val + '%');
   applyUniverseFilters();
 }
 
@@ -3070,7 +3184,7 @@ function renderReviewColumns() {
       const matchText = (counterVal && counterVal.textContent !== '--') ? counterVal.textContent : 'N/A';
       html += `<div class="review-section"><div class="review-section-title">Universe</div><div class="review-grid">
         <div class="review-item"><div class="review-item-label">Matching Accounts</div><div class="review-item-value">${matchText}</div></div>
-        <div class="review-item"><div class="review-item-label">Ownership</div><div class="review-item-value">${universeConfig.ownership === 'both' ? 'Public & Private' : universeConfig.ownership}</div></div>
+        <div class="review-item"><div class="review-item-label">Ownership</div><div class="review-item-value">${universeConfig.ownership === 'both' ? 'Public & Private' : universeConfig.ownership === 'weighted' ? `Custom Mix: ${universeConfig.ownershipMix}% Public / ${100 - universeConfig.ownershipMix}% Private` : universeConfig.ownership}</div></div>
       </div></div>`;
     } else {
       html += `<div class="review-section"><div class="review-section-title">Universe</div><div class="review-grid">
@@ -3347,7 +3461,7 @@ function buildSummaryText() {
       text += `  Employee Range: ${fmt(universeConfig.employeeMin)} - ${fmt(universeConfig.employeeMax)}\n`;
       text += `  Revenue: ${REVENUE_BRACKETS[universeConfig.revenueMin]?.label || 'All'} to ${REVENUE_BRACKETS[universeConfig.revenueMax]?.label || 'All'}\n`;
       text += `  Min Locations: ${universeConfig.locationsMin === 0 ? 'No minimum' : universeConfig.locationsMin + '+'}\n`;
-      text += `  Ownership: ${universeConfig.ownership === 'both' ? 'Public & Private' : universeConfig.ownership}\n\n`;
+      text += `  Ownership: ${universeConfig.ownership === 'both' ? 'Public & Private' : universeConfig.ownership === 'weighted' ? `Custom Mix (${universeConfig.ownershipMix}% Public / ${100 - universeConfig.ownershipMix}% Private)` : universeConfig.ownership}\n\n`;
     }
 
     text += `FIT PARAMETERS\n`;
@@ -3484,7 +3598,8 @@ function resetDefaults() {
     revenueMin: 0,
     revenueMax: 5,
     locationsMin: 0,
-    ownership: 'both'
+    ownership: 'both',
+    ownershipMix: 50
   };
 
   // Reset universe DOM elements
@@ -3513,10 +3628,16 @@ function resetDefaults() {
   if (empFill) { empFill.style.left = '0%'; empFill.style.width = '100%'; }
   if (revFill) { revFill.style.left = '0%'; revFill.style.width = '100%'; }
 
-  // Reset ownership buttons
+  // Reset ownership buttons and mix slider
   document.querySelectorAll('.ownership-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.value === 'both');
   });
+  const mixPanel = document.getElementById('ownership-mix-panel');
+  if (mixPanel) mixPanel.classList.remove('visible');
+  const mixRange = document.getElementById('ownership-mix-range');
+  if (mixRange) { mixRange.value = 50; mixRange.style.setProperty('--pct', '50%'); }
+  const mixDisplay = document.getElementById('mix-value-display');
+  if (mixDisplay) mixDisplay.textContent = '50% Public / 50% Private';
 
   // Reset sub-industry checkboxes (check all)
   document.querySelectorAll('#universe-filters input[type="checkbox"]').forEach(cb => {
