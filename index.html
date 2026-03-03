@@ -23,8 +23,8 @@
   --text-muted: #666666;
   --border-light: #E0E0E0;
   --grade-a: #27AE60;
-  --grade-b: #F2994A;
-  --grade-c: #828282;
+  --grade-b: #D4B847;
+  --grade-c: #D98080;
   --fin-accent: #6366F1;
   --header-height: 56px;
   --step-bar-height: 48px;
@@ -1031,8 +1031,8 @@ body {
 }
 
 .tier-badge.a { background: rgba(39, 174, 96, 0.12); color: var(--grade-a); }
-.tier-badge.b { background: rgba(242, 153, 74, 0.12); color: var(--grade-b); }
-.tier-badge.c { background: rgba(130, 130, 130, 0.12); color: var(--grade-c); }
+.tier-badge.b { background: rgba(212, 184, 71, 0.12); color: var(--grade-b); }
+.tier-badge.c { background: rgba(217, 128, 128, 0.12); color: var(--grade-c); }
 
 /* ================================================================
    DATA COVERAGE DASHBOARD
@@ -1927,7 +1927,7 @@ body {
   padding: 0 16px;
 }
 .hiw-note p {
-  font-size: 15px;
+  font-size: 19px;
   color: var(--text-muted);
   line-height: 1.5;
   margin-bottom: 16px;
@@ -2057,7 +2057,7 @@ body {
         </div>
 
         <div class="hiw-note">
-          <p>Sensible defaults are already set within this form.</p>
+          <p>Defaults are already set within this form.</p>
           <p>You're welcome to accept them as is, or make as many adjustments as preferred.</p>
           <p>Your inputs and selections made in this form will be applied to score every account in the production dataset.</p>
         </div>
@@ -2144,7 +2144,7 @@ body {
 
           <div class="info-callout" style="margin-bottom:16px;">
             <span class="icon">&#x2139;</span>
-            <span>There are multiple ways to narrow from 4,300+ to ~500 ICP accounts. You can filter by employee count, revenue range, number of locations, company type, or specific sub-industries — or any combination. The live counter above tracks your current match count as you adjust. <strong>All data points below are sourced from ZoomInfo firmographic records.</strong></span>
+            <span>There are multiple ways to narrow from 4,300+ to ~500 ICP accounts. You can filter by employee count, revenue range, number of locations, company type, or specific sub-industries — or any combination. The live counter above tracks your current match count as you adjust.</span>
           </div>
 
           <!-- Employee Range -->
@@ -2164,13 +2164,6 @@ body {
                   <span>25,000</span>
                 </div>
               </div>
-              <div class="control-label" style="font-size:14px; margin-top:8px;">Accounts with no employee data:</div>
-              <div class="unknown-toggle" id="unknown-emp-toggle">
-                <button class="unknown-toggle-btn active" data-value="include" onclick="setUnknownHandling('employees', 'include', this)">Include</button>
-                <button class="unknown-toggle-btn" data-value="exclude" onclick="setUnknownHandling('employees', 'exclude', this)">Exclude</button>
-                <button class="unknown-toggle-btn" data-value="estimate" onclick="setUnknownHandling('employees', 'estimate', this)">Estimate</button>
-              </div>
-              <div class="unknown-handling-hint" id="unknown-emp-hint">Accounts with no employee data pass through this filter.</div>
             </div>
           </div>
 
@@ -2197,13 +2190,6 @@ body {
                   <span>$5B+</span>
                 </div>
               </div>
-              <div class="control-label" style="font-size:14px; margin-top:8px;">Accounts with no revenue data:</div>
-              <div class="unknown-toggle" id="unknown-rev-toggle">
-                <button class="unknown-toggle-btn active" data-value="include" onclick="setUnknownHandling('revenue', 'include', this)">Include</button>
-                <button class="unknown-toggle-btn" data-value="exclude" onclick="setUnknownHandling('revenue', 'exclude', this)">Exclude</button>
-                <button class="unknown-toggle-btn" data-value="estimate" onclick="setUnknownHandling('revenue', 'estimate', this)">Estimate</button>
-              </div>
-              <div class="unknown-handling-hint" id="unknown-rev-hint">Accounts with no revenue data pass through this filter.</div>
             </div>
           </div>
 
@@ -2336,18 +2322,19 @@ body {
     </div>
     <div class="accent-line"></div>
 
-    <div class="scoring-mode-banner">
-      <span class="icon">&#x1F504;</span>
-      <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
-    </div>
-
     <div class="edu-intro" style="max-width:720px; margin:0 auto 20px;">
       FIT measures how well a company matches Panopto's ideal customer profile based on firmographic characteristics. Companies that closely match these criteria may earn higher FIT scores.
     </div>
 
-    <div class="additive-banner" style="text-align:left; max-width:720px; margin:0 auto 20px;">
-      <span class="icon">&#x2795;</span>
-      <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+    <div style="display:flex; gap:16px; max-width:720px; margin:0 auto 20px;">
+      <div class="scoring-mode-banner" style="flex:1; margin:0;">
+        <span class="icon">&#x1F504;</span>
+        <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
+      </div>
+      <div class="additive-banner" style="flex:1; margin:0; text-align:left;">
+        <span class="icon">&#x2795;</span>
+        <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+      </div>
     </div>
 
     <div class="dual-columns" id="fit-columns"></div>
@@ -2369,18 +2356,19 @@ body {
     </div>
     <div class="accent-line"></div>
 
-    <div class="scoring-mode-banner">
-      <span class="icon">&#x1F504;</span>
-      <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
-    </div>
-
     <div class="edu-intro" style="max-width:720px; margin:0 auto 20px;">
       SIGNALS detect active indicators that a company may need or may already be investing in video-based learning and knowledge management. When these signals are found, it may increase confidence that the account is a strong prospect.
     </div>
 
-    <div class="additive-banner" style="text-align:left; max-width:720px; margin:0 auto 20px;">
-      <span class="icon">&#x2795;</span>
-      <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+    <div style="display:flex; gap:16px; max-width:720px; margin:0 auto 20px;">
+      <div class="scoring-mode-banner" style="flex:1; margin:0;">
+        <span class="icon">&#x1F504;</span>
+        <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
+      </div>
+      <div class="additive-banner" style="flex:1; margin:0; text-align:left;">
+        <span class="icon">&#x2795;</span>
+        <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+      </div>
     </div>
 
     <div class="dual-columns" id="signals-columns"></div>
@@ -2402,18 +2390,19 @@ body {
     </div>
     <div class="accent-line"></div>
 
-    <div class="scoring-mode-banner">
-      <span class="icon">&#x1F504;</span>
-      <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
-    </div>
-
     <div class="edu-intro" style="max-width:720px; margin:0 auto 20px;">
       TIMING captures urgency and recency signals — recent leadership changes, expansion announcements, technology transitions, and other indicators that suggest a company may be ready to act now. Most accounts will have 1-2 verifiable timing signals.
     </div>
 
-    <div class="additive-banner" style="text-align:left; max-width:720px; margin:0 auto 20px;">
-      <span class="icon">&#x2795;</span>
-      <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+    <div style="display:flex; gap:16px; max-width:720px; margin:0 auto 20px;">
+      <div class="scoring-mode-banner" style="flex:1; margin:0;">
+        <span class="icon">&#x1F504;</span>
+        <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
+      </div>
+      <div class="additive-banner" style="flex:1; margin:0; text-align:left;">
+        <span class="icon">&#x2795;</span>
+        <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+      </div>
     </div>
 
     <div class="dual-columns" id="timing-columns"></div>
@@ -2533,7 +2522,7 @@ const TIMING_TRIGGERS = [
 ];
 
 const SIGNAL_DEFS = [
-  { id: 'lms', label: 'LMS / Training Platform Detection', question: 'How should LMS or training platform detection influence the score?', desc: 'Companies with existing LMS investment may be higher-value prospects for video learning solutions.', dataSource: 'Found via: ZoomInfo technographics, company website scraping' },
+  { id: 'lms', label: 'LMS / Training Platform Detection', question: 'How should LMS or training platform detection influence the score?', desc: 'Companies with existing LMS investment may be higher-value prospects for video learning solutions.', dataSource: 'Found via: Explorium, Apollo, or ZoomInfo technographics API' },
   { id: 'website', label: 'Website Training Content', question: 'How should training-related website content influence the score?', desc: 'Training-related website content may signal organizational commitment to L&D.', dataSource: 'Found via: Company website analysis (homepage, /careers, /training, /resources)' },
   { id: 'jobs', label: 'Job Market Signals', question: 'How should active L&D job postings influence the score?', desc: 'Active L&D hiring may indicate dedicated budget and learning initiatives.', dataSource: 'Found via: Job board APIs, company careers pages' },
   { id: 'news', label: 'News & Event Signals', question: 'How should public training commitments in the news influence the score?', desc: 'Companies making public commitments to training may be active prospects for video platforms.', dataSource: 'Found via: News aggregation, press releases, SEC filings' }
@@ -2710,6 +2699,13 @@ async function fetchUniverseData(gid) {
 function findColumn(data, ...candidates) {
   if (data.length === 0) return null;
   const keys = Object.keys(data[0]);
+  // Try exact match first
+  for (const c of candidates) {
+    const cl = c.toLowerCase();
+    const exact = keys.find(k => k.toLowerCase() === cl);
+    if (exact) return exact;
+  }
+  // Fall back to substring match
   for (const c of candidates) {
     const cl = c.toLowerCase();
     const found = keys.find(k => k.toLowerCase().includes(cl));
@@ -3561,7 +3557,7 @@ function renderWeightsColumns() {
       <!-- Weight Allocation -->
       <div class="card">
         <div class="card-header-bar">Dimension Weight Allocation</div>
-        <div class="card-description">By default, each dimension is weighted equally (~33% each). If you'd like to adjust emphasis — for example, placing higher priority on behavioral signals — you can change these values. Weights must sum to 100.</div>
+        <div class="card-description">By default, each dimension is weighted equally (~33% each). If you'd like to adjust emphasis — for example, placing higher priority on behavioral signals — you can change these values. Leaving these as the default allocation works perfectly fine. Weights must sum to 100.</div>
 
         <div class="weight-display" id="${seg}-weight-bars">
           <div class="weight-bar fit" id="${seg}-weight-bar-fit" style="flex:${c.weights.fit};">FIT ${c.weights.fit}%</div>
