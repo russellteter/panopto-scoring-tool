@@ -1923,12 +1923,16 @@ body {
 }
 
 .hiw-note {
-  font-size: 14px;
-  color: var(--text-muted);
   text-align: center;
-  line-height: 1.5;
   padding: 0 16px;
 }
+.hiw-note p {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.hiw-note p:last-child { margin-bottom: 0; }
 
 /* ================================================================
    RESPONSIVE
@@ -2053,13 +2057,10 @@ body {
         </div>
 
         <div class="hiw-note">
-          Sensible defaults are already set — accept them or adjust anything. Your configuration will be applied to score every account in the production run.
+          <p>Sensible defaults are already set within this form.</p>
+          <p>You're welcome to accept them as is, or make as many adjustments as preferred.</p>
+          <p>Your inputs and selections made in this form will be applied to score every account in the production dataset.</p>
         </div>
-      </div>
-
-      <div class="additive-banner" style="text-align:left; max-width:680px; margin:0 auto 32px;">
-        <span class="icon">&#x2795;</span>
-        <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
       </div>
 
       <div style="display:flex; justify-content:center; margin-top:8px;">
@@ -2337,11 +2338,16 @@ body {
 
     <div class="scoring-mode-banner">
       <span class="icon">&#x1F504;</span>
-      <span><strong>You're now adjusting scoring, not filtering.</strong> From this point forward, all accounts remain in the pool. Your selections here determine how each account is scored and ranked — not whether it's included or excluded.</span>
+      <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
     </div>
 
     <div class="edu-intro" style="max-width:720px; margin:0 auto 20px;">
       FIT measures how well a company matches Panopto's ideal customer profile based on firmographic characteristics. Companies that closely match these criteria may earn higher FIT scores.
+    </div>
+
+    <div class="additive-banner" style="text-align:left; max-width:720px; margin:0 auto 20px;">
+      <span class="icon">&#x2795;</span>
+      <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
     </div>
 
     <div class="dual-columns" id="fit-columns"></div>
@@ -2372,6 +2378,11 @@ body {
       SIGNALS detect active indicators that a company may need or may already be investing in video-based learning and knowledge management. When these signals are found, it may increase confidence that the account is a strong prospect.
     </div>
 
+    <div class="additive-banner" style="text-align:left; max-width:720px; margin:0 auto 20px;">
+      <span class="icon">&#x2795;</span>
+      <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+    </div>
+
     <div class="dual-columns" id="signals-columns"></div>
 
     <div class="step-nav">
@@ -2396,8 +2407,13 @@ body {
       <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
     </div>
 
-    <div class="expectation-note" style="max-width:720px; margin:0 auto 20px;">
-      Most accounts will have 1-2 verifiable timing signals. These indicators are detected by AI analysis of public sources — not all signals will be found for every account.
+    <div class="edu-intro" style="max-width:720px; margin:0 auto 20px;">
+      TIMING captures urgency and recency signals — recent leadership changes, expansion announcements, technology transitions, and other indicators that suggest a company may be ready to act now. Most accounts will have 1-2 verifiable timing signals.
+    </div>
+
+    <div class="additive-banner" style="text-align:left; max-width:720px; margin:0 auto 20px;">
+      <span class="icon">&#x2795;</span>
+      <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
     </div>
 
     <div class="dual-columns" id="timing-columns"></div>
@@ -2428,7 +2444,7 @@ body {
       The Composite Score is calculated as: <strong>FIT &times; weight + SIGNALS &times; weight + TIMING &times; weight = Score (0-100)</strong>. Adjust the weights to reflect what may matter most to Panopto's prioritization.
     </div>
 
-    <div class="additive-banner" style="text-align:left; max-width:600px; margin:0 auto 20px;">
+    <div class="additive-banner" style="text-align:left; max-width:720px; margin:0 auto 20px;">
       <span class="icon">&#x2795;</span>
       <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
     </div>
