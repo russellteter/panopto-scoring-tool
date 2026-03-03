@@ -1718,6 +1718,96 @@ body {
 }
 
 /* ================================================================
+   HOW IT WORKS — Landing Section
+   ================================================================ */
+.hiw-section {
+  max-width: 680px;
+  margin: 0 auto 28px;
+  text-align: left;
+}
+
+.hiw-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.hiw-subtitle {
+  font-size: 16px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.hiw-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.hiw-step {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--light-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  transition: border-color var(--transition);
+}
+
+.hiw-step:hover {
+  border-color: var(--teal-secondary);
+}
+
+.hiw-step-num {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  background: var(--teal-deep);
+  color: var(--teal-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.hiw-step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.hiw-step-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.hiw-step-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.hiw-note {
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+  padding: 0 16px;
+}
+
+/* ================================================================
    RESPONSIVE
    ================================================================ */
 @media (max-width: 1280px) {
@@ -1750,6 +1840,7 @@ body {
   .landing-hero h1 { font-size: 28px; }
   .landing-hero p { font-size: 18px; }
   .step-bar { padding: 0 8px; }
+  .hiw-steps { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -1789,23 +1880,61 @@ body {
       <h1>ICP Tiering Methodology</h1>
       <p>Configure how Panopto's ICP accounts will be scored and prioritized across Manufacturing and Non-Banking Finance.</p>
 
-      <div class="card" style="max-width:600px; margin:0 auto 32px; text-align:left;">
-        <div class="card-header-bar">How It Works</div>
-        <div class="card-description" style="margin-bottom:12px;">
-          This workbook walks you through the scoring methodology we'll use to rank and prioritize ICP accounts across Manufacturing and Non-Banking Finance. You'll make decisions in six steps:
+      <div class="hiw-section">
+        <div class="hiw-title">How It Works</div>
+        <div class="hiw-subtitle">Six steps to configure how ICP accounts are scored, tiered, and prioritized.</div>
+
+        <div class="hiw-steps">
+          <div class="hiw-step">
+            <div class="hiw-step-num">1</div>
+            <div class="hiw-step-content">
+              <div class="hiw-step-label">Target Accounts</div>
+              <div class="hiw-step-desc">Filter by size, revenue, and sub-industry to choose which accounts get scored.</div>
+            </div>
+          </div>
+          <div class="hiw-step">
+            <div class="hiw-step-num">2</div>
+            <div class="hiw-step-content">
+              <div class="hiw-step-label">FIT Score</div>
+              <div class="hiw-step-desc">How well does the company match Panopto's ideal customer profile?</div>
+            </div>
+          </div>
+          <div class="hiw-step">
+            <div class="hiw-step-num">3</div>
+            <div class="hiw-step-content">
+              <div class="hiw-step-label">SIGNALS Score</div>
+              <div class="hiw-step-desc">What behavioral evidence suggests active need or buying intent?</div>
+            </div>
+          </div>
+          <div class="hiw-step">
+            <div class="hiw-step-num">4</div>
+            <div class="hiw-step-content">
+              <div class="hiw-step-label">TIMING Score</div>
+              <div class="hiw-step-desc">Are there urgency indicators like leadership changes or contract renewals?</div>
+            </div>
+          </div>
+          <div class="hiw-step">
+            <div class="hiw-step-num">5</div>
+            <div class="hiw-step-content">
+              <div class="hiw-step-label">Weights &amp; Thresholds</div>
+              <div class="hiw-step-desc">Set how much each dimension matters and where A/B/C tier cutoffs fall.</div>
+            </div>
+          </div>
+          <div class="hiw-step">
+            <div class="hiw-step-num">6</div>
+            <div class="hiw-step-content">
+              <div class="hiw-step-label">Review &amp; Share</div>
+              <div class="hiw-step-desc">See your full configuration, then download, copy, or share via URL.</div>
+            </div>
+          </div>
         </div>
-        <div style="font-size:17px; color:var(--text-secondary); line-height:1.7; margin-bottom:16px;">
-          <strong>1. Target Accounts</strong> — Choose which accounts to include by filtering on size, revenue, and sub-industry.<br>
-          <strong>2-4. Scoring Dimensions</strong> — Review how FIT (firmographics), SIGNALS (behavioral evidence), and TIMING (urgency indicators) contribute to each account's score.<br>
-          <strong>5. Weights &amp; Thresholds</strong> — Decide how much each dimension matters and where the Tier A/B/C cutoffs should be.<br>
-          <strong>6. Review</strong> — See a complete summary and share your configuration.
-        </div>
-        <div style="font-size:16px; color:var(--text-muted); line-height:1.5;">
-          Sensible defaults are already set — you can accept them or adjust anything. Your choices will be applied to score every account in the production run. The output is a tiered, prioritized list of accounts ready for outreach.
+
+        <div class="hiw-note">
+          Sensible defaults are already set — accept them or adjust anything. Your configuration will be applied to score every account in the production run.
         </div>
       </div>
 
-      <div class="additive-banner" style="text-align:left; max-width:600px; margin:0 auto 32px;">
+      <div class="additive-banner" style="text-align:left; max-width:680px; margin:0 auto 32px;">
         <span class="icon">&#x2795;</span>
         <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
       </div>
