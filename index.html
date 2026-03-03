@@ -1798,9 +1798,6 @@ body {
             </div>
           </div>
           <div class="funnel-note">Use the filters below to narrow from 4,300+ to ~500 ICP accounts.</div>
-          <div style="margin-top:12px;">
-            <a href="https://docs.google.com/spreadsheets/d/1O4M_UpxauT5HX7e0V2Zznybq9URyPIgrHT3emn5t9ZE/edit#gid=709766622" target="_blank" rel="noopener" style="color:var(--teal-primary); font-size:16px; text-decoration:underline; font-family:'Instrument Sans';">View full Manufacturing account list in Google Sheets &#8599;</a>
-          </div>
         </div>
 
         <!-- Exclusion callout -->
@@ -1913,17 +1910,21 @@ body {
             <div class="card-description">Select specific sub-industries to include. Accounts from unchecked sub-industries will be excluded. Classifications are based on ZoomInfo industry and sub-industry fields.</div>
 
             <div class="filter-section">
-              <div class="filter-section-title">Priority Sub-Industries</div>
+              <div class="filter-section-title">Top Ten Sub-Industries by Total Accounts</div>
               <div id="priority-subs" class="sub-industry-grid"></div>
             </div>
 
             <div class="divider"></div>
 
             <div class="filter-section">
-              <div class="filter-section-title">All Sub-Industries by Category</div>
+              <div class="filter-section-title">All Other Sub-Industries</div>
               <div id="grouped-subs"></div>
             </div>
           </div>
+        </div>
+
+        <div style="margin-top:16px; text-align:center;">
+          <a href="https://docs.google.com/spreadsheets/d/1O4M_UpxauT5HX7e0V2Zznybq9URyPIgrHT3emn5t9ZE/edit#gid=709766622" target="_blank" rel="noopener" style="color:var(--teal-primary); font-size:16px; text-decoration:underline; font-family:'Instrument Sans';">View full Manufacturing account list in Google Sheets &#8599;</a>
         </div>
       </div>
 
@@ -1934,7 +1935,7 @@ body {
 
         <div class="universe-card card" style="margin-bottom:20px;">
           <div class="card-title">Non-Banking Finance Universe</div>
-          <div class="card-description">All 467 ICP-qualified accounts will receive full scoring — no narrowing needed.</div>
+          <div class="card-description">All 467 ICP-qualified accounts will receive full scoring.</div>
           <div class="funnel-progress">
             <div class="funnel-progress-step completed">
               <div class="funnel-step-dot">&#10003;</div>
@@ -1954,10 +1955,6 @@ body {
               <div class="funnel-progress-label">ICP Accounts</div>
             </div>
           </div>
-          <div class="funnel-note">With only 467 qualifying accounts — exactly the SOW target — all accounts proceed directly to scoring.</div>
-          <div style="margin-top:12px;">
-            <a href="https://docs.google.com/spreadsheets/d/1O4M_UpxauT5HX7e0V2Zznybq9URyPIgrHT3emn5t9ZE/edit#gid=40938868" target="_blank" rel="noopener" style="color:var(--teal-primary); font-size:16px; text-decoration:underline; font-family:'Instrument Sans';">View full Finance account list in Google Sheets &#8599;</a>
-          </div>
         </div>
 
         <div class="info-callout" style="margin-top:16px;">
@@ -1967,6 +1964,10 @@ body {
 
         <div class="exclusion-callout" style="margin-top:12px;">
           <strong>2 accounts excluded</strong> — existing Panopto customers removed at Panopto's request.
+        </div>
+
+        <div style="margin-top:16px; text-align:center;">
+          <a href="https://docs.google.com/spreadsheets/d/1O4M_UpxauT5HX7e0V2Zznybq9URyPIgrHT3emn5t9ZE/edit#gid=40938868" target="_blank" rel="noopener" style="color:var(--teal-primary); font-size:16px; text-decoration:underline; font-family:'Instrument Sans';">View full Finance account list in Google Sheets &#8599;</a>
         </div>
       </div>
     </div>
@@ -2545,7 +2546,7 @@ function applyUniverseFilters() {
   const pct = Math.abs(count - 500) / 500;
   if (pct <= 0.1) { target.className = 'target-indicator target-green'; target.textContent = `${fmt(count)} ~ Target: ~500`; }
   else if (pct <= 0.25) { target.className = 'target-indicator target-yellow'; target.textContent = `Target: ~500`; }
-  else { target.className = 'target-indicator target-red'; target.textContent = `Target: ~500`; }
+  else { target.className = 'target-indicator target-yellow'; target.textContent = `Target: ~500`; }
 
   // Gate Continue button: enable only when count is within 25% of 500 (375-625)
   const continueBtn = document.getElementById('universe-continue-btn');
