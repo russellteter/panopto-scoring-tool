@@ -2466,8 +2466,8 @@ body {
     <div class="spacer"></div>
 
     <div class="card" style="background: var(--teal-deep); border:none; color:white; max-width:700px; margin:0 auto; text-align:center;">
-      <div style="margin-bottom:16px;">
-        <div style="font-size:16px; color:rgba(255,255,255,0.7); font-family:'Instrument Sans'; margin-bottom:12px;">When you're done, submit your selections. This copies a shareable link and opens an email to send to Locality AI.</div>
+      <div style="margin-bottom:16px; display:flex; flex-direction:column; align-items:center;">
+        <div style="font-size:16px; color:rgba(255,255,255,0.7); font-family:'Instrument Sans'; margin-bottom:12px;">Ready to share your selections? Click below to copy your configuration link and open a pre-filled email to Locality AI.</div>
         <button class="btn" style="background:var(--teal-primary); color:var(--teal-deep); font-weight:700; font-size:17px; padding:12px 32px;" onclick="submitSelections()">Submit Selections</button>
       </div>
       <div style="border-top:1px solid rgba(255,255,255,0.15); padding-top:14px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center;">
@@ -2866,12 +2866,20 @@ function buildUniverseFilters(data) {
   const sorted = Object.entries(subCounts).sort((a, b) => b[1] - a[1]);
   const topN = sorted.slice(0, 10);
   universeConfig.subIndustries = sorted.map(s => s[0]);
+  // Apply pending excluded sub-industries from compact URL
+  if (pendingExcludedSubs) {
+    const excSet = new Set(pendingExcludedSubs);
+    universeConfig.subIndustries = universeConfig.subIndustries.filter(s => !excSet.has(s));
+    pendingExcludedSubs = null;
+  }
   const priorityContainer = document.getElementById('priority-subs');
   priorityContainer.innerHTML = '';
+  const selectedSet = new Set(universeConfig.subIndustries);
   topN.forEach(([name, count]) => {
     const label = document.createElement('label');
     label.className = 'sub-check';
-    label.innerHTML = `<input type="checkbox" checked data-sub="${esc(name)}" onchange="toggleSubIndustry(this)"><span class="name">${esc(name)}</span><span class="count">${count}</span>`;
+    const isChecked = selectedSet.has(name) ? 'checked' : '';
+    label.innerHTML = `<input type="checkbox" ${isChecked} data-sub="${esc(name)}" onchange="toggleSubIndustry(this)"><span class="name">${esc(name)}</span><span class="count">${count}</span>`;
     priorityContainer.appendChild(label);
   });
   const remaining = sorted.slice(10);
@@ -2903,7 +2911,7 @@ function buildUniverseFilters(data) {
         <span class="group-count">${totalCount} accounts</span>
       </div>
       <div class="group-items">${items.map(i =>
-        `<label class="sub-check"><input type="checkbox" checked data-sub="${esc(i.name)}" onchange="toggleSubIndustry(this)"><span class="name">${esc(i.name)}</span><span class="count">${i.count}</span></label>`
+        `<label class="sub-check"><input type="checkbox" ${selectedSet.has(i.name) ? 'checked' : ''} data-sub="${esc(i.name)}" onchange="toggleSubIndustry(this)"><span class="name">${esc(i.name)}</span><span class="count">${i.count}</span></label>`
       ).join('')}</div>`;
     groupedContainer.appendChild(wrapper);
   }
@@ -4093,27 +4101,93 @@ function submitSelections() {
   const subject = encodeURIComponent('Panopto ICP Scoring Tool — My Selections');
   const body = encodeURIComponent('Here are my scoring tool selections:\n\n' + url + '\n\nOpen this link to see the exact configuration I chose.');
   navigator.clipboard.writeText(url).then(() => {
-    showToast('URL copied — opening email...');
+    showToast('Link copied! Opening email — click Send to submit to Locality AI.');
     setTimeout(() => {
       window.open('mailto:russell@localityai.com?subject=' + subject + '&body=' + body, '_self');
-    }, 500);
+    }, 800);
   });
+}
+
+// Deep diff: return only keys where current value differs from default
+function diffObj(current, defaults) {
+  if (current === defaults) return undefined;
+  if (typeof current !== 'object' || current === null || Array.isArray(current)) {
+    return JSON.stringify(current) === JSON.stringify(defaults) ? undefined : current;
+  }
+  const delta = {};
+  for (const key in current) {
+    const d = diffObj(current[key], defaults[key]);
+    if (d !== undefined) delta[key] = d;
+  }
+  return Object.keys(delta).length ? delta : undefined;
+}
+
+// Deep merge: apply partial delta onto defaults
+function deepMerge(target, source) {
+  if (!source || typeof source !== 'object' || Array.isArray(source)) return source;
+  const result = { ...target };
+  for (const key in source) {
+    if (typeof source[key] === 'object' && !Array.isArray(source[key]) && typeof target[key] === 'object' && !Array.isArray(target[key])) {
+      result[key] = deepMerge(target[key], source[key]);
+    } else {
+      result[key] = source[key];
+    }
+  }
+  return result;
 }
 
 function encodeState() {
   syncFromDOM();
   try {
-    const state = { step: currentStepIndex, mfg: config.mfg, fin: config.fin, uni: universeConfig };
-    window.location.hash = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+    const uniDefaults = { employeeMin: 1000, employeeMax: 25000, revenueMin: 0, revenueMax: 5, locationsMin: 0, ownership: 'both', ownershipMix: 50, unknownHandling: { employees: 'include', revenue: 'include', locations: 'include' } };
+    const uniCopy = { ...universeConfig };
+    delete uniCopy.subIndustries;
+    const mfgDelta = diffObj(config.mfg, getDefaults('mfg'));
+    const finDelta = diffObj(config.fin, getDefaults('fin'));
+    const uniDelta = diffObj(uniCopy, uniDefaults) || {};
+    // SubIndustries: store excluded list (usually much shorter than full list)
+    if (universeData.length > 0 && universeConfig.subIndustries) {
+      const subCol = Object.keys(universeData[0]).find(k => /sub.?industr/i.test(k));
+      if (subCol) {
+        const allSubs = [...new Set(universeData.map(r => r[subCol]).filter(Boolean))];
+        const selected = new Set(universeConfig.subIndustries);
+        const excluded = allSubs.filter(s => !selected.has(s));
+        if (excluded.length > 0) uniDelta.excl = excluded;
+      }
+    }
+    const state = { s: currentStepIndex };
+    if (mfgDelta) state.m = mfgDelta;
+    if (finDelta) state.f = finDelta;
+    if (Object.keys(uniDelta).length) state.u = uniDelta;
+    window.location.hash = 'c:' + btoa(unescape(encodeURIComponent(JSON.stringify(state))));
   } catch (e) { /* silently fail if state too large */ }
 }
+
+// Pending excluded sub-industries to apply after data loads
+let pendingExcludedSubs = null;
 
 function decodeState() {
   try {
     const hash = window.location.hash.slice(1);
     if (!hash) return false;
+    let state;
+    if (hash.startsWith('c:')) {
+      // Compact delta format
+      const json = decodeURIComponent(escape(atob(hash.slice(2))));
+      const compact = JSON.parse(json);
+      if (typeof compact.s === 'number') currentStepIndex = compact.s;
+      if (compact.m) config.mfg = deepMerge(getDefaults('mfg'), compact.m);
+      if (compact.f) config.fin = deepMerge(getDefaults('fin'), compact.f);
+      if (compact.u) {
+        const { excl, ...uniRest } = compact.u;
+        if (Object.keys(uniRest).length) universeConfig = { ...universeConfig, ...uniRest };
+        if (excl && excl.length > 0) pendingExcludedSubs = excl;
+      }
+      return true;
+    }
+    // Legacy full-state format
     const json = decodeURIComponent(escape(atob(hash)));
-    const state = JSON.parse(json);
+    state = JSON.parse(json);
     if (typeof state.step === 'number') currentStepIndex = state.step;
     // Handle old format (per-segment step index)
     if (state.step && typeof state.step === 'object') currentStepIndex = 0;
