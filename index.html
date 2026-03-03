@@ -1,0 +1,3556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1A4A45">
+<title>Panopto ICP Scoring Configuration — Locality AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   CSS Variables — Locality AI Branding
+   ================================================================ */
+:root {
+  --teal-primary: #1ED4C2;
+  --teal-secondary: #5CD4C8;
+  --teal-deep: #1A4A45;
+  --teal-medium: #1CCAB8;
+  --light-bg: #F8F8F8;
+  --light-surface: #FFFFFF;
+  --text-primary: #1F1F23;
+  --text-secondary: #4A4A4A;
+  --text-muted: #666666;
+  --border-light: #E0E0E0;
+  --grade-a: #27AE60;
+  --grade-b: #F2994A;
+  --grade-c: #828282;
+  --fin-accent: #6366F1;
+  --header-height: 56px;
+  --step-bar-height: 48px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --transition: 0.2s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+/* Focus-visible styles for keyboard accessibility */
+button:focus-visible,
+input[type="number"]:focus-visible,
+input[type="range"]:focus-visible,
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible,
+input[type="text"]:focus-visible,
+select:focus-visible,
+.action-chip:focus-visible,
+.maturity-btn:focus-visible {
+  outline: 2px solid var(--teal-primary);
+  outline-offset: 2px;
+}
+input[type="range"]:focus-visible { outline-offset: 4px; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  color: var(--text-primary);
+  background: var(--light-bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ================================================================
+   HEADER (fixed top, 56px)
+   ================================================================ */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--header-height);
+  background: var(--light-surface);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 1000;
+  box-shadow: var(--shadow-sm);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--teal-deep);
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.header-logo .separator {
+  color: var(--border-light);
+  margin: 0 2px;
+  font-weight: 400;
+}
+
+.header-logo .tool-name {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border-light);
+  background: var(--light-surface);
+  color: var(--text-muted);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.header-btn:hover {
+  border-color: var(--teal-primary);
+  color: var(--teal-deep);
+}
+
+.header-btn.primary {
+  background: var(--teal-deep);
+  color: var(--teal-primary);
+  border-color: var(--teal-deep);
+}
+
+.header-btn.primary:hover {
+  background: #153b37;
+}
+
+/* ================================================================
+   HORIZONTAL STEP BAR (sticky, below header)
+   ================================================================ */
+.step-bar {
+  position: fixed;
+  top: var(--header-height);
+  left: 0; right: 0;
+  height: var(--step-bar-height);
+  background: var(--light-surface);
+  border-bottom: 1px solid var(--border-light);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  z-index: 999;
+  padding: 0 24px;
+}
+
+.step-bar.visible { display: flex; }
+
+.step-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  border: none;
+  background: none;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.step-bar-item:hover { color: var(--text-primary); }
+
+.step-bar-item .step-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  background: var(--light-bg);
+  border: 1.5px solid var(--border-light);
+  color: var(--text-muted);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.step-bar-item.active { color: var(--teal-deep); font-weight: 700; }
+.step-bar-item.active .step-dot {
+  background: rgba(30, 212, 194, 0.15);
+  color: var(--teal-deep);
+  border-color: var(--teal-primary);
+}
+
+.step-bar-item.completed .step-dot {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--grade-a);
+  border-color: rgba(39, 174, 96, 0.3);
+}
+.step-bar-item.completed { color: var(--text-secondary); }
+
+.step-bar-item.disabled { opacity: 0.4; cursor: not-allowed; }
+
+.step-bar-connector {
+  width: 32px;
+  height: 1.5px;
+  background: var(--border-light);
+  flex-shrink: 0;
+}
+
+.step-bar-connector.completed { background: rgba(39, 174, 96, 0.3); }
+
+/* ================================================================
+   MAIN CONTENT AREA (full-width, no sidebar)
+   ================================================================ */
+.main {
+  margin-top: var(--header-height);
+  padding: 32px 40px 100px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main.with-step-bar {
+  margin-top: calc(var(--header-height) + var(--step-bar-height));
+}
+
+/* ================================================================
+   WIZARD STEPS
+   ================================================================ */
+.wizard-step { display: none; opacity: 0; transform: translateY(8px); }
+.wizard-step.active { display: block; animation: stepFadeIn 0.3s ease forwards; }
+@keyframes stepFadeIn { to { opacity: 1; transform: translateY(0); } }
+
+.step-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.step-overline {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--teal-primary);
+  margin-bottom: 6px;
+}
+
+.step-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.step-description {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Accent line separator */
+.accent-line {
+  width: 60px;
+  height: 3px;
+  background: var(--teal-primary);
+  margin: 20px auto;
+  border-radius: 2px;
+}
+
+/* ================================================================
+   DUAL-COLUMN LAYOUT
+   ================================================================ */
+.dual-columns {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+}
+
+.col-mfg, .col-fin {
+  flex: 1;
+  padding: 0 20px;
+  min-width: 0;
+}
+
+.col-divider {
+  width: 2px;
+  background: var(--border-light);
+  flex-shrink: 0;
+  align-self: stretch;
+  min-height: 200px;
+}
+
+.col-header {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 8px 0 16px;
+  padding-top: 12px;
+  margin-bottom: 4px;
+  border-bottom: 2px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: calc(var(--header-height) + var(--step-bar-height));
+  z-index: 40;
+  background: var(--light-bg);
+}
+
+.col-header.mfg { color: var(--teal-deep); border-bottom-color: var(--teal-primary); }
+.col-header.fin { color: var(--fin-accent); border-bottom-color: var(--fin-accent); }
+
+.col-header .col-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.col-header.mfg .col-dot { background: var(--teal-primary); }
+.col-header.fin .col-dot { background: var(--fin-accent); }
+
+/* ================================================================
+   ADDITIVE-ONLY BANNER
+   ================================================================ */
+.additive-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(30, 212, 194, 0.06);
+  border: 1px solid rgba(30, 212, 194, 0.2);
+  border-left: 3px solid var(--teal-primary);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-bottom: 24px;
+  font-size: 16px;
+  color: var(--teal-deep);
+  font-weight: 500;
+}
+
+.additive-banner .icon { font-size: 16px; flex-shrink: 0; }
+
+/* ================================================================
+   CARDS
+   ================================================================ */
+.card {
+  background: var(--light-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-header-bar {
+  background: var(--teal-deep);
+  color: var(--teal-primary);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 8px 16px;
+  margin: -20px -20px 16px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.card-description {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.card-grid-3col { grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.dimension-card { padding: 14px; border-radius: 8px; }
+.dimension-card.fit { background: rgba(39,174,96,0.06); border: 1px solid rgba(39,174,96,0.15); }
+.dimension-card.signals { background: rgba(242,153,74,0.06); border: 1px solid rgba(242,153,74,0.15); }
+.dimension-card.timing { background: rgba(219,39,119,0.06); border: 1px solid rgba(219,39,119,0.15); }
+.dimension-card-title { font-weight: 700; font-size: 17px; margin-bottom: 4px; }
+.dimension-card-title.fit { color: var(--grade-a); }
+.dimension-card-title.signals { color: var(--grade-b); }
+.dimension-card-title.timing { color: #DB2777; }
+.dimension-card-desc { font-size: 16px; color: var(--text-secondary); }
+.funnel-note { margin-top: 12px; font-size: 15px; color: rgba(255,255,255,0.5); }
+.review-item-full { grid-column: 1 / -1; }
+.loc-slider { flex: 1; height: 6px; -webkit-appearance: none; appearance: none; background: var(--border-light); border-radius: 3px; outline: none; }
+
+/* ================================================================
+   UNIVERSE SIZING CARD
+   ================================================================ */
+.universe-card {
+  background: linear-gradient(135deg, var(--teal-deep) 0%, #1a3f3b 100%);
+  color: white;
+  border: none;
+  padding: 28px;
+}
+
+.universe-card .card-title {
+  color: white;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.universe-card .card-description {
+  color: rgba(255,255,255,0.75);
+  font-size: 17px;
+}
+
+.universe-funnel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.funnel-step {
+  text-align: center;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.12);
+  min-width: 100px;
+}
+
+.funnel-step .value {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--teal-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.funnel-step .label {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 4px;
+}
+
+.funnel-arrow {
+  font-size: 20px;
+  color: rgba(255,255,255,0.3);
+}
+
+/* Funnel progress tracker style */
+.funnel-progress {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.funnel-progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 110px;
+}
+
+.funnel-step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.05);
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.funnel-progress-step.completed .funnel-step-dot {
+  background: rgba(39,174,96,0.2);
+  border-color: var(--grade-a);
+  color: var(--grade-a);
+}
+
+.funnel-progress-step.active .funnel-step-dot {
+  background: rgba(242,201,76,0.25);
+  border-color: #F2C94C;
+  color: #B7950B;
+  animation: funnel-pulse 2s ease infinite;
+}
+
+.funnel-progress-step.active .funnel-progress-value {
+  color: #F2C94C;
+}
+
+@keyframes funnel-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(242,201,76,0.35); }
+  50% { box-shadow: 0 0 0 6px rgba(242,201,76,0); }
+}
+
+.funnel-progress-connector {
+  width: 40px;
+  height: 2px;
+  background: rgba(255,255,255,0.15);
+  margin-top: 16px;
+  flex-shrink: 0;
+}
+
+.funnel-progress-connector.completed {
+  background: rgba(39,174,96,0.4);
+}
+
+.funnel-progress-value {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--teal-primary);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 4px;
+}
+
+.funnel-progress-label {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.5);
+  max-width: 120px;
+}
+
+/* Scoring mode banner (purple) */
+.scoring-mode-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-left: 3px solid var(--fin-accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 16px;
+  color: #312E81;
+  font-weight: 500;
+  text-align: left;
+  max-width: 720px;
+  margin: 0 auto 20px;
+}
+
+.scoring-mode-banner .icon { font-size: 16px; flex-shrink: 0; }
+
+/* ================================================================
+   FORM CONTROLS
+   ================================================================ */
+.control-group {
+  margin-bottom: 20px;
+}
+
+.control-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.control-hint {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 16px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+/* ================================================================
+   RADIO CHOICE GROUPS (replaces sliders + toggles)
+   ================================================================ */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.radio-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--light-surface);
+}
+
+.radio-choice:hover {
+  border-color: var(--teal-secondary);
+  background: rgba(30, 212, 194, 0.02);
+}
+
+.radio-choice.selected {
+  border-color: var(--teal-primary);
+  background: rgba(30, 212, 194, 0.06);
+}
+
+.radio-choice input[type="radio"] {
+  accent-color: var(--teal-primary);
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.radio-choice-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.radio-choice-desc {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Custom range reveal inside radio choice */
+.custom-range-inputs {
+  display: none;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light);
+}
+
+.custom-range-inputs.visible { display: flex; }
+
+.custom-range-inputs input[type="text"],
+.custom-range-inputs input[type="number"] {
+  width: 90px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--border-light);
+  border-radius: 6px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.custom-range-inputs input:focus {
+  border-color: var(--teal-primary);
+}
+
+.custom-range-inputs .range-sep {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 16px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* ================================================================
+   3-OPTION SIGNAL RADIOS
+   ================================================================ */
+.signal-radio-group {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.signal-radio {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-light);
+  background: var(--light-surface);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.signal-radio:hover { border-color: var(--teal-secondary); }
+
+.signal-radio.active {
+  background: var(--teal-deep);
+  color: var(--teal-primary);
+  border-color: var(--teal-deep);
+}
+
+.signal-radio.skip.active {
+  background: var(--light-bg);
+  color: var(--text-muted);
+  border-color: var(--border-light);
+}
+
+/* ================================================================
+   SIGNAL/TIMING ROWS
+   ================================================================ */
+.signal-row {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.signal-row:last-child { border-bottom: none; }
+
+.signal-row-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.signal-info { flex: 1; }
+
+.signal-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.signal-desc {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+/* ================================================================
+   DATA SOURCE BADGES
+   ================================================================ */
+.data-source {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.data-source .ds-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   COMPETITOR ACTION SELECT
+   ================================================================ */
+.action-select {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.action-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-light);
+  background: var(--light-surface);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--text-muted);
+}
+
+.action-chip:hover { border-color: var(--teal-secondary); }
+
+.action-chip.active {
+  background: var(--teal-deep);
+  color: var(--teal-primary);
+  border-color: var(--teal-deep);
+}
+
+/* ================================================================
+   WEIGHT ALLOCATION
+   ================================================================ */
+.weight-display {
+  display: flex;
+  gap: 3px;
+  height: 36px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.weight-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  transition: flex var(--transition);
+  min-width: 40px;
+  font-variant-numeric: tabular-nums;
+}
+
+.weight-bar.fit { background: var(--grade-a); }
+.weight-bar.signals { background: var(--grade-b); }
+.weight-bar.timing { background: #DB2777; }
+
+.weight-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.weight-input-group {
+  text-align: center;
+}
+
+.weight-input-group label {
+  display: block;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.weight-input-group label.fit { color: var(--grade-a); }
+.weight-input-group label.signals { color: var(--grade-b); }
+.weight-input-group label.timing { color: #DB2777; }
+
+.weight-dimension-hint {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.weight-input-group input[type="number"] {
+  width: 72px;
+  padding: 8px;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition);
+  font-variant-numeric: tabular-nums;
+}
+
+.weight-input-group input[type="number"]:focus {
+  border-color: var(--teal-primary);
+}
+
+.weight-validation {
+  text-align: center;
+  margin-top: 8px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.weight-validation.valid { color: var(--grade-a); }
+.weight-validation.invalid { color: #dc2626; }
+
+/* ================================================================
+   TIER THRESHOLD CONTROL
+   ================================================================ */
+.threshold-group {
+  margin-top: 24px;
+}
+
+.threshold-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.threshold-label {
+  min-width: 90px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.threshold-label .badge {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.threshold-label .badge.a { color: var(--grade-a); }
+.threshold-label .badge.b { color: var(--grade-b); }
+
+.threshold-slider {
+  flex: 1;
+}
+
+.threshold-slider input[type="range"] {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border-light);
+  border-radius: 3px;
+  outline: none;
+}
+
+.threshold-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--teal-deep);
+  border: 3px solid var(--teal-primary);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+}
+
+.threshold-slider input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--teal-deep);
+  border: 3px solid var(--teal-primary);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+}
+
+.threshold-value {
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  min-width: 40px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.threshold-value.a { color: var(--grade-a); }
+.threshold-value.b { color: var(--grade-b); }
+
+/* Tier visual bar (ported from Alpha) */
+.tier-bar-visual {
+  display: flex;
+  gap: 2px;
+  margin-top: 16px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  height: 36px;
+}
+
+.tier-bar-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  transition: flex 0.3s ease;
+}
+
+.tier-bar-segment.tier-c { background: var(--grade-c); }
+.tier-bar-segment.tier-b { background: var(--grade-b); }
+.tier-bar-segment.tier-a { background: var(--grade-a); }
+
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.tier-badge.a { background: rgba(39, 174, 96, 0.12); color: var(--grade-a); }
+.tier-badge.b { background: rgba(242, 153, 74, 0.12); color: var(--grade-b); }
+.tier-badge.c { background: rgba(130, 130, 130, 0.12); color: var(--grade-c); }
+
+/* ================================================================
+   UNIVERSE NARROWING FILTERS
+   ================================================================ */
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.filter-section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--teal-deep);
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+  color: white;
+}
+
+.live-counter .count {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--teal-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.live-counter .of-total {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  color: rgba(255,255,255,0.6);
+}
+
+.live-counter .target-indicator {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.target-green { background: rgba(39, 174, 96, 0.2); color: #4ADE80; }
+.target-yellow { background: rgba(251, 191, 36, 0.2); color: #FBBF24; }
+.target-red { background: rgba(248, 113, 113, 0.2); color: #F87171; }
+
+/* Sticky live counter */
+.live-counter.sticky {
+  position: sticky;
+  top: calc(var(--header-height) + var(--step-bar-height) + 8px);
+  z-index: 50;
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-lg);
+}
+
+/* Tier estimate display */
+.tier-estimate { margin-top: 12px; text-align: center; }
+.tier-est-counts { display: flex; justify-content: center; gap: 20px; font-family: 'Instrument Sans'; font-variant-numeric: tabular-nums; }
+.tier-est { font-size: 17px; font-weight: 600; }
+.tier-est.a { color: var(--grade-a); }
+.tier-est.b { color: var(--grade-b); }
+.tier-est.c { color: var(--grade-c); }
+.tier-est-note { font-size: 15px; color: var(--text-muted); margin-top: 4px; font-family: 'Instrument Sans'; }
+.tier-est-warning { font-size: 15px; color: var(--grade-b); margin-top: 6px; font-family: 'Instrument Sans'; font-style: italic; }
+
+/* Exclusion callout */
+.exclusion-callout { background: #FFF8E7; border: 1px solid #F2D98B; border-radius: var(--radius); padding: 12px 16px; margin-top: 12px; font-size: 16px; }
+.exclusion-callout strong { color: var(--text-primary); }
+.exclusion-toggle { cursor: pointer; color: var(--teal-deep); font-weight: 600; text-decoration: underline; font-size: 15px; }
+.exclusion-details { display: none; margin-top: 8px; font-size: 15px; color: var(--text-secondary); }
+.exclusion-details.visible { display: block; }
+
+/* Sub-industry checkboxes */
+.sub-industry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.sub-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background var(--transition);
+  font-size: 16px;
+}
+
+.sub-check:hover { background: var(--light-bg); }
+
+.sub-check input[type="checkbox"] {
+  accent-color: var(--teal-primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.sub-check .name {
+  flex: 1;
+  font-family: 'Syne', sans-serif;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.sub-check .count {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Expandable groups */
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background var(--transition);
+  margin-bottom: 2px;
+}
+
+.group-header:hover { background: var(--light-bg); }
+
+.group-header .arrow {
+  font-size: 12px;
+  transition: transform var(--transition);
+  color: var(--text-muted);
+}
+
+.group-header .arrow.open { transform: rotate(90deg); }
+
+.group-header .group-name {
+  flex: 1;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.group-header .group-count {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.group-items {
+  display: none;
+  padding-left: 16px;
+  margin-bottom: 8px;
+}
+
+.group-items.open { display: block; }
+
+/* Ownership toggle */
+.ownership-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--light-bg);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.ownership-btn {
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.ownership-btn.active {
+  background: var(--light-surface);
+  color: var(--teal-deep);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Dual-handle slider (for universe narrowing) */
+.dual-slider {
+  position: relative;
+  height: 60px;
+  margin: 12px 0 24px;
+}
+
+.dual-slider .track {
+  position: absolute;
+  top: 34px;
+  left: 0; right: 0;
+  height: 6px;
+  background: var(--border-light);
+  border-radius: 3px;
+}
+
+.dual-slider .fill {
+  position: absolute;
+  top: 34px;
+  height: 6px;
+  background: var(--teal-primary);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.dual-slider input[type="range"] {
+  position: absolute;
+  width: 100%;
+  top: 24px;
+  height: 26px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+  outline: none;
+}
+
+.dual-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--teal-deep);
+  border: 3px solid var(--teal-primary);
+  cursor: pointer;
+  pointer-events: all;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 2;
+}
+
+.dual-slider input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--teal-deep);
+  border: 3px solid var(--teal-primary);
+  cursor: pointer;
+  pointer-events: all;
+  box-shadow: var(--shadow-md);
+}
+
+.dual-slider .labels {
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  bottom: -18px;
+  left: 0; right: 0;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.dual-slider .range-display {
+  text-align: center;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--teal-deep);
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bracket slider (for universe revenue) */
+.bracket-slider {
+  position: relative;
+  margin: 12px 0 8px;
+}
+
+.bracket-slider .track-container {
+  position: relative;
+  height: 40px;
+}
+
+.bracket-slider .track {
+  position: absolute;
+  top: 16px;
+  left: 0; right: 0;
+  height: 6px;
+  background: var(--border-light);
+  border-radius: 3px;
+}
+
+.bracket-slider .fill {
+  position: absolute;
+  top: 16px;
+  height: 6px;
+  background: var(--teal-primary);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.bracket-slider input[type="range"] {
+  position: absolute;
+  width: 100%;
+  top: 6px;
+  height: 26px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+  outline: none;
+}
+
+.bracket-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--teal-deep);
+  border: 3px solid var(--teal-primary);
+  cursor: pointer;
+  pointer-events: all;
+  box-shadow: var(--shadow-md);
+}
+
+.bracket-slider input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--teal-deep);
+  border: 3px solid var(--teal-primary);
+  cursor: pointer;
+  pointer-events: all;
+  box-shadow: var(--shadow-md);
+}
+
+.bracket-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.bracket-slider .range-display {
+  text-align: center;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--teal-deep);
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================================
+   L&D ORG MATURITY TOGGLE
+   ================================================================ */
+.maturity-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.maturity-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-light);
+  background: var(--light-surface);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--text-muted);
+}
+
+.maturity-btn:hover { border-color: var(--teal-secondary); }
+
+.maturity-btn.active {
+  background: var(--teal-deep);
+  color: var(--teal-primary);
+  border-color: var(--teal-deep);
+}
+
+/* ================================================================
+   LOADING STATES
+   ================================================================ */
+.loading-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-light);
+  border-top-color: var(--teal-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ================================================================
+   REVIEW SUMMARY
+   ================================================================ */
+.review-section {
+  margin-bottom: 20px;
+}
+
+.review-section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--teal-deep);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--teal-primary);
+  display: inline-block;
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.review-item {
+  padding: 8px 12px;
+  background: var(--light-bg);
+  border-radius: 6px;
+}
+
+.review-item-label {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.review-item-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+/* ================================================================
+   NAVIGATION BUTTONS
+   ================================================================ */
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: var(--radius);
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+}
+
+.btn-secondary {
+  background: var(--light-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
+.btn-secondary:hover { border-color: var(--teal-secondary); color: var(--teal-deep); }
+
+.btn-primary {
+  background: var(--teal-deep);
+  color: var(--teal-primary);
+}
+
+.btn-primary:hover { background: #153b37; }
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ================================================================
+   TOAST
+   ================================================================ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--teal-deep);
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  z-index: 2000;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  box-shadow: var(--shadow-lg);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ================================================================
+   EDUCATIONAL INTRO
+   ================================================================ */
+.edu-intro {
+  padding: 14px 18px;
+  background: var(--light-bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+  margin-bottom: 20px;
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ================================================================
+   EXPECTATION NOTE
+   ================================================================ */
+.expectation-note {
+  padding: 12px 16px;
+  background: rgba(242, 153, 74, 0.06);
+  border: 1px solid rgba(242, 153, 74, 0.2);
+  border-left: 3px solid var(--grade-b);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-bottom: 20px;
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ================================================================
+   INFO CALLOUT
+   ================================================================ */
+.info-callout {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(30, 212, 194, 0.04);
+  border: 1px solid rgba(30, 212, 194, 0.15);
+  border-radius: var(--radius);
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.info-callout .icon { flex-shrink: 0; font-size: 17px; margin-top: 2px; }
+
+/* ================================================================
+   MISC
+   ================================================================ */
+.divider { height: 1px; background: var(--border-light); margin: 20px 0; }
+.spacer { height: 24px; }
+
+/* Landing page specific */
+.landing-hero {
+  text-align: center;
+  padding: 60px 20px 40px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.landing-hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+
+.landing-hero p {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+.landing-begin {
+  padding: 14px 36px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 1280px) {
+  .dual-columns {
+    flex-direction: column;
+  }
+  .col-divider {
+    width: auto;
+    height: 2px;
+    min-height: 0;
+    margin: 16px 0;
+    align-self: auto;
+  }
+  .col-mfg, .col-fin {
+    padding: 0;
+  }
+  .step-bar-item span:not(.step-dot) {
+    display: none;
+  }
+  .step-bar-connector {
+    width: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main { padding: 24px 16px 80px; }
+  .sub-industry-grid { grid-template-columns: 1fr; }
+  .review-grid { grid-template-columns: 1fr; }
+  .card-grid-3col { grid-template-columns: 1fr; }
+  .landing-hero h1 { font-size: 28px; }
+  .landing-hero p { font-size: 18px; }
+  .step-bar { padding: 0 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+     HEADER
+     ================================================================ -->
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo">
+      Panopto ICP Scoring<span class="separator">|</span><span class="tool-name">Configuration Tool</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="header-btn" onclick="resetDefaults()">Reset Defaults</button>
+    <button class="header-btn" onclick="copySummary()">Copy Summary</button>
+    <button class="header-btn primary" onclick="downloadConfig()">Download Config</button>
+  </div>
+</header>
+
+<!-- ================================================================
+     HORIZONTAL STEP BAR (hidden on landing)
+     ================================================================ -->
+<nav class="step-bar" id="step-bar"></nav>
+
+<!-- ================================================================
+     MAIN CONTENT
+     ================================================================ -->
+<main class="main" id="main-content">
+
+  <!-- ============================================================
+       LANDING PAGE (not a numbered step)
+       ============================================================ -->
+  <div class="wizard-step active" id="step-landing">
+    <div class="landing-hero">
+      <h1>ICP Tiering Methodology</h1>
+      <p>Configure how Panopto's ICP accounts will be scored and prioritized across Manufacturing and Non-Banking Finance.</p>
+
+      <div class="card" style="max-width:600px; margin:0 auto 32px; text-align:left;">
+        <div class="card-header-bar">How It Works</div>
+        <div class="card-description" style="margin-bottom:12px;">
+          This workbook walks you through the scoring methodology we'll use to rank and prioritize ICP accounts across Manufacturing and Non-Banking Finance. You'll make decisions in six steps:
+        </div>
+        <div style="font-size:17px; color:var(--text-secondary); line-height:1.7; margin-bottom:16px;">
+          <strong>1. Target Accounts</strong> — Choose which accounts to include by filtering on size, revenue, and sub-industry.<br>
+          <strong>2-4. Scoring Dimensions</strong> — Review how FIT (firmographics), SIGNALS (behavioral evidence), and TIMING (urgency indicators) contribute to each account's score.<br>
+          <strong>5. Weights &amp; Thresholds</strong> — Decide how much each dimension matters and where the Tier A/B/C cutoffs should be.<br>
+          <strong>6. Review</strong> — See a complete summary and share your configuration.
+        </div>
+        <div style="font-size:16px; color:var(--text-muted); line-height:1.5;">
+          Sensible defaults are already set — you can accept them or adjust anything. Your choices will be applied to score every account in the production run. The output is a tiered, prioritized list of accounts ready for outreach.
+        </div>
+      </div>
+
+      <div class="additive-banner" style="text-align:left; max-width:600px; margin:0 auto 32px;">
+        <span class="icon">&#x2795;</span>
+        <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+      </div>
+
+      <div style="display:flex; justify-content:center; margin-top:8px;">
+        <button class="btn btn-primary landing-begin" onclick="beginConfiguration()">Begin &#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       STEP 1: UNIVERSE
+       ============================================================ -->
+  <div class="wizard-step" id="step-universe">
+    <div class="step-header">
+      <div class="step-overline">Step 1 of 6</div>
+      <h1 class="step-title">Determine Target Accounts</h1>
+      <p class="step-description">Decide which accounts to include in the scoring run. Use the filters on the left to narrow Manufacturing from 4,300+ to ~500 accounts. Finance accounts all proceed directly to scoring.</p>
+    </div>
+    <div class="accent-line"></div>
+
+    <div class="dual-columns">
+      <div class="col-mfg">
+        <h3 class="col-header mfg"><span class="col-dot"></span>Manufacturing</h3>
+
+        <!-- Mfg Universe Funnel -->
+        <div class="universe-card card" style="margin-bottom:20px;">
+          <div class="card-title">Manufacturing Universe</div>
+          <div class="card-description">From total addressable market to ICP-qualified accounts.</div>
+          <div class="funnel-progress">
+            <div class="funnel-progress-step completed">
+              <div class="funnel-step-dot">&#10003;</div>
+              <div class="funnel-progress-value">919K+</div>
+              <div class="funnel-progress-label">Total US Mfg</div>
+            </div>
+            <div class="funnel-progress-connector completed"></div>
+            <div class="funnel-progress-step completed">
+              <div class="funnel-step-dot">&#10003;</div>
+              <div class="funnel-progress-value">4,300+</div>
+              <div class="funnel-progress-label">1K-25K Employees</div>
+            </div>
+            <div class="funnel-progress-connector"></div>
+            <div class="funnel-progress-step active">
+              <div class="funnel-step-dot">3</div>
+              <div class="funnel-progress-value">~500</div>
+              <div class="funnel-progress-label">ICP Accounts</div>
+            </div>
+          </div>
+          <div class="funnel-note">Use the filters below to narrow from 4,300+ to ~500 ICP accounts.</div>
+          <div style="margin-top:12px;">
+            <a href="https://docs.google.com/spreadsheets/d/1O4M_UpxauT5HX7e0V2Zznybq9URyPIgrHT3emn5t9ZE/edit#gid=709766622" target="_blank" rel="noopener" style="color:var(--teal-primary); font-size:16px; text-decoration:underline; font-family:'Instrument Sans';">View full Manufacturing account list in Google Sheets &#8599;</a>
+          </div>
+        </div>
+
+        <!-- Exclusion callout -->
+        <div class="exclusion-callout">
+          <strong>23 Panopto accounts excluded</strong> — 3 open pipeline accounts + 20 existing customer accounts removed at Panopto's request.
+          <span class="exclusion-toggle" onclick="this.nextElementSibling.classList.toggle('visible')">Show details</span>
+          <div class="exclusion-details">
+            <strong>Pipeline (3):</strong> accounts currently in active sales pipeline<br>
+            <strong>Customers (20):</strong> existing Panopto customers already under contract
+          </div>
+        </div>
+
+        <!-- Live counter -->
+        <div class="live-counter sticky" id="universe-counter">
+          <span class="count" id="counter-value">--</span>
+          <span class="of-total">of <span id="counter-total">--</span> accounts match</span>
+          <span class="target-indicator" id="counter-target">Target: ~500</span>
+        </div>
+
+        <!-- Loading state -->
+        <div id="universe-loading" class="loading-overlay">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading account data...</div>
+        </div>
+
+        <!-- Filter controls (hidden until data loads) -->
+        <div id="universe-filters" style="display:none;">
+
+          <div class="info-callout" style="margin-bottom:16px;">
+            <span class="icon">&#x2139;</span>
+            <span>There are multiple ways to narrow from 4,300+ to ~500 ICP accounts. You can filter by employee count, revenue range, number of locations, company type, or specific sub-industries — or any combination. The live counter above tracks your current match count as you adjust. <strong>All data points below are sourced from ZoomInfo firmographic records.</strong></span>
+          </div>
+
+          <!-- Employee Range -->
+          <div class="card">
+            <div class="card-header-bar">Employee Count Range</div>
+            <div class="control-group">
+              <div class="control-label">Filter accounts by employee count</div>
+              <div class="control-hint">ICP range: 1,000 - 25,000 employees. Source: ZoomInfo employee count.</div>
+              <div class="dual-slider" id="universe-emp-slider">
+                <div class="range-display" id="universe-emp-display">1,000 - 25,000</div>
+                <div class="track"></div>
+                <div class="fill" id="universe-emp-fill"></div>
+                <input type="range" id="universe-emp-min" min="1000" max="25000" step="500" value="1000">
+                <input type="range" id="universe-emp-max" min="1000" max="25000" step="500" value="25000">
+                <div class="labels">
+                  <span>1,000</span>
+                  <span>25,000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Revenue Range -->
+          <div class="card">
+            <div class="card-header-bar">Revenue Range</div>
+            <div class="control-group">
+              <div class="control-label">Filter accounts by annual revenue</div>
+              <div class="control-hint">Source: ZoomInfo reported annual revenue.</div>
+              <div class="bracket-slider" id="universe-rev-slider">
+                <div class="range-display" id="universe-rev-display">All revenue ranges</div>
+                <div class="track-container">
+                  <div class="track"></div>
+                  <div class="fill" id="universe-rev-fill"></div>
+                  <input type="range" id="universe-rev-min" min="0" max="5" step="1" value="0">
+                  <input type="range" id="universe-rev-max" min="0" max="5" step="1" value="5">
+                </div>
+                <div class="bracket-labels">
+                  <span>&lt;$50M</span>
+                  <span>$50M</span>
+                  <span>$200M</span>
+                  <span>$500M</span>
+                  <span>$1B</span>
+                  <span>$5B+</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Location Minimum + Ownership -->
+          <div class="card-grid">
+            <div class="card">
+              <div class="card-header-bar">Minimum Locations</div>
+              <div class="control-group">
+                <div class="control-label">Include accounts with at least:</div>
+                <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+                  <input type="range" id="universe-loc-min" min="0" max="100" step="5" value="0" class="loc-slider">
+                  <span id="universe-loc-display" style="font-family:'Instrument Sans'; font-size:16px; font-weight:700; color:var(--teal-deep); min-width:60px; text-align:right; font-variant-numeric:tabular-nums;">0+</span>
+                </div>
+                <div class="control-hint" style="margin-top:8px;">Set to 0 to include all accounts regardless of location count. Source: ZoomInfo location count.</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header-bar">Company Type</div>
+              <div class="control-group">
+                <div class="control-label">Include:</div>
+                <div class="control-hint">Source: ZoomInfo company type classification.</div>
+                <div class="ownership-toggle" style="margin-top:8px;">
+                  <button class="ownership-btn active" data-value="both" onclick="setOwnership('both', this)">Both</button>
+                  <button class="ownership-btn" data-value="public" onclick="setOwnership('public', this)">Public</button>
+                  <button class="ownership-btn" data-value="private" onclick="setOwnership('private', this)">Private</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub-Industry Selection -->
+          <div class="card">
+            <div class="card-header-bar">Sub-Industry Selection</div>
+            <div class="card-description">Select specific sub-industries to include. Accounts from unchecked sub-industries will be excluded. Classifications are based on ZoomInfo industry and sub-industry fields.</div>
+
+            <div class="filter-section">
+              <div class="filter-section-title">Priority Sub-Industries</div>
+              <div id="priority-subs" class="sub-industry-grid"></div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="filter-section">
+              <div class="filter-section-title">All Sub-Industries by Category</div>
+              <div id="grouped-subs"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-divider"></div>
+
+      <div class="col-fin">
+        <h3 class="col-header fin"><span class="col-dot"></span>Non-Banking Finance</h3>
+
+        <div class="universe-card card" style="margin-bottom:20px;">
+          <div class="card-title">Non-Banking Finance Universe</div>
+          <div class="card-description">All 467 ICP-qualified accounts will receive full scoring — no narrowing needed.</div>
+          <div class="funnel-progress">
+            <div class="funnel-progress-step completed">
+              <div class="funnel-step-dot">&#10003;</div>
+              <div class="funnel-progress-value">317K+</div>
+              <div class="funnel-progress-label">Total US Finance</div>
+            </div>
+            <div class="funnel-progress-connector completed"></div>
+            <div class="funnel-progress-step completed">
+              <div class="funnel-step-dot">&#10003;</div>
+              <div class="funnel-progress-value">1,006</div>
+              <div class="funnel-progress-label">1K-10K, excl. Banking</div>
+            </div>
+            <div class="funnel-progress-connector completed"></div>
+            <div class="funnel-progress-step completed">
+              <div class="funnel-step-dot">&#10003;</div>
+              <div class="funnel-progress-value">467</div>
+              <div class="funnel-progress-label">ICP Accounts</div>
+            </div>
+          </div>
+          <div class="funnel-note">With only 467 qualifying accounts — exactly the SOW target — all accounts proceed directly to scoring.</div>
+          <div style="margin-top:12px;">
+            <a href="https://docs.google.com/spreadsheets/d/1O4M_UpxauT5HX7e0V2Zznybq9URyPIgrHT3emn5t9ZE/edit#gid=40938868" target="_blank" rel="noopener" style="color:var(--teal-primary); font-size:16px; text-decoration:underline; font-family:'Instrument Sans';">View full Finance account list in Google Sheets &#8599;</a>
+          </div>
+        </div>
+
+        <div class="info-callout" style="margin-top:16px;">
+          <span class="icon">&#x2139;</span>
+          <span>The Finance universe is compact enough that no narrowing filters are needed. All 467 accounts that meet the ICP criteria (1,000-10,000 employees, non-banking) will be scored in the production run.</span>
+        </div>
+
+        <div class="exclusion-callout" style="margin-top:12px;">
+          <strong>2 accounts excluded</strong> — existing Panopto customers removed at Panopto's request.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-secondary" onclick="goToLanding()">&#8592; Back</button>
+      <button class="btn btn-primary" id="universe-continue-btn" onclick="nextStep()" disabled>Continue to FIT &#8594;</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       STEP 2: FIT PARAMETERS (dual-column)
+       ============================================================ -->
+  <div class="wizard-step" id="step-fit">
+    <div class="step-header">
+      <div class="step-overline">Step 2 of 6</div>
+      <h1 class="step-title">FIT Parameters</h1>
+      <p class="step-description">Define how firmographic characteristics contribute to the FIT score.</p>
+    </div>
+    <div class="accent-line"></div>
+
+    <div class="scoring-mode-banner">
+      <span class="icon">&#x1F504;</span>
+      <span><strong>You're now adjusting scoring, not filtering.</strong> From this point forward, all accounts remain in the pool. Your selections here determine how each account is scored and ranked — not whether it's included or excluded.</span>
+    </div>
+
+    <div class="edu-intro" style="max-width:720px; margin:0 auto 20px;">
+      FIT measures how well a company matches Panopto's ideal customer profile based on firmographic characteristics. Companies that closely match these criteria may earn higher FIT scores.
+    </div>
+
+    <div class="dual-columns" id="fit-columns"></div>
+
+    <div class="step-nav">
+      <button class="btn btn-secondary" onclick="prevStep()">&#8592; Back</button>
+      <button class="btn btn-primary" onclick="nextStep()">Continue to SIGNALS &#8594;</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       STEP 3: SIGNAL PARAMETERS (dual-column)
+       ============================================================ -->
+  <div class="wizard-step" id="step-signals">
+    <div class="step-header">
+      <div class="step-overline">Step 3 of 6</div>
+      <h1 class="step-title">SIGNAL Parameters</h1>
+      <p class="step-description">Configure which behavioral signals are tracked and how much they influence the score.</p>
+    </div>
+    <div class="accent-line"></div>
+
+    <div class="scoring-mode-banner">
+      <span class="icon">&#x1F504;</span>
+      <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
+    </div>
+
+    <div class="edu-intro" style="max-width:720px; margin:0 auto 20px;">
+      SIGNALS detect active indicators that a company may need or may already be investing in video-based learning and knowledge management. When these signals are found, it may increase confidence that the account is a strong prospect.
+    </div>
+
+    <div class="dual-columns" id="signals-columns"></div>
+
+    <div class="step-nav">
+      <button class="btn btn-secondary" onclick="prevStep()">&#8592; Back</button>
+      <button class="btn btn-primary" onclick="nextStep()">Continue to TIMING &#8594;</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       STEP 4: TIMING PARAMETERS (dual-column)
+       ============================================================ -->
+  <div class="wizard-step" id="step-timing">
+    <div class="step-header">
+      <div class="step-overline">Step 4 of 6</div>
+      <h1 class="step-title">TIMING Parameters</h1>
+      <p class="step-description">Configure how urgency and timing signals contribute to prioritization.</p>
+    </div>
+    <div class="accent-line"></div>
+
+    <div class="scoring-mode-banner">
+      <span class="icon">&#x1F504;</span>
+      <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
+    </div>
+
+    <div class="expectation-note" style="max-width:720px; margin:0 auto 20px;">
+      Most accounts will have 1-2 verifiable timing signals. These indicators are detected by AI analysis of public sources — not all signals will be found for every account.
+    </div>
+
+    <div class="dual-columns" id="timing-columns"></div>
+
+    <div class="step-nav">
+      <button class="btn btn-secondary" onclick="prevStep()">&#8592; Back</button>
+      <button class="btn btn-primary" onclick="nextStep()">Continue to Weights &#8594;</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       STEP 5: FRAMEWORK WEIGHTS & THRESHOLDS (dual-column)
+       ============================================================ -->
+  <div class="wizard-step" id="step-weights">
+    <div class="step-header">
+      <div class="step-overline">Step 5 of 6</div>
+      <h1 class="step-title">Framework Weights &amp; Thresholds</h1>
+      <p class="step-description">Now that you've seen what makes up each dimension, decide how much each should contribute to the final score.</p>
+    </div>
+    <div class="accent-line"></div>
+
+    <div class="scoring-mode-banner">
+      <span class="icon">&#x1F504;</span>
+      <span><strong>Scoring mode:</strong> These settings affect how accounts are scored, not which accounts are included.</span>
+    </div>
+
+    <div class="edu-intro" style="max-width:720px; margin:0 auto 20px;">
+      The Composite Score is calculated as: <strong>FIT &times; weight + SIGNALS &times; weight + TIMING &times; weight = Score (0-100)</strong>. Adjust the weights to reflect what may matter most to Panopto's prioritization.
+    </div>
+
+    <div class="additive-banner" style="text-align:left; max-width:600px; margin:0 auto 20px;">
+      <span class="icon">&#x2795;</span>
+      <span><strong>Additive scoring:</strong> Signals found increase the score. Missing data is never penalized. Every account starts at zero and earns points based on detected evidence.</span>
+    </div>
+
+    <div class="dual-columns" id="weights-columns"></div>
+
+    <div class="step-nav">
+      <button class="btn btn-secondary" onclick="prevStep()">&#8592; Back</button>
+      <button class="btn btn-primary" id="weights-next-btn" onclick="nextStep()">Review Configuration &#8594;</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       STEP 6: REVIEW + SHARE (dual-column)
+       ============================================================ -->
+  <div class="wizard-step" id="step-review">
+    <div class="step-header">
+      <div class="step-overline">Step 6 of 6</div>
+      <h1 class="step-title">Review &amp; Share</h1>
+      <p class="step-description">Here's a complete summary of your scoring configuration for both segments.</p>
+    </div>
+    <div class="accent-line"></div>
+
+    <div class="dual-columns" id="review-columns"></div>
+
+    <div class="spacer"></div>
+
+    <div class="card" style="background: var(--teal-deep); border:none; color:white; max-width:700px; margin:0 auto;">
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <button class="btn" style="background:var(--teal-primary); color:var(--teal-deep); font-weight:700;" onclick="copySummary()">Copy Summary</button>
+        <button class="btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);" onclick="downloadConfig()">Download Config JSON</button>
+        <button class="btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);" onclick="copyURL()">Copy Shareable URL</button>
+      </div>
+      <div style="margin-top:10px; font-size:15px; color:rgba(255,255,255,0.5); font-family:'Instrument Sans';">Share this URL with anyone — it encodes all configuration in the link and restores the exact same settings.</div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-secondary" onclick="prevStep()">&#8592; Back to Edit</button>
+      <div></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+// =====================================================================
+// CONSTANTS & DEFAULT CONFIGURATIONS
+// =====================================================================
+
+const SHEET_ID = '1O4M_UpxauT5HX7e0V2Zznybq9URyPIgrHT3emn5t9ZE';
+const MFG_GID = '709766622';
+const FIN_GID = '40938868';
+
+const REVENUE_BRACKETS = [
+  { label: '<$50M', min: 0, max: 50 },
+  { label: '$50M-$200M', min: 50, max: 200 },
+  { label: '$200M-$500M', min: 200, max: 500 },
+  { label: '$500M-$1B', min: 500, max: 1000 },
+  { label: '$1B-$5B', min: 1000, max: 5000 },
+  { label: '$5B+', min: 5000, max: Infinity }
+];
+
+const REV_SWEET_LABELS = ['$50M', '$200M', '$500M', '$1B', '$5B', '$10B+'];
+
+const MFG_SUB_GROUPS = {
+  'Heavy Manufacturing': ['Metals & Mining', 'Metal & Steel Manufacturing', 'Glass, Ceramics & Concrete', 'Mining & Metals', 'Steel & Iron', 'Concrete, Glass & Building Materials'],
+  'Process Manufacturing': ['Chemical Manufacturing', 'Chemicals', 'Petroleum & Fuel Products', 'Petroleum', 'Plastics & Rubber', 'Plastics & Rubber Manufacturing', 'Paper & Forest Products', 'Paper & Packaging'],
+  'Consumer Goods': ['Food & Beverage Manufacturing', 'Food & Beverage', 'Consumer Products Manufacturing', 'Consumer Products', 'Consumer Electronics', 'Textiles & Apparel', 'Textile Manufacturing', 'Tobacco', 'Household Products'],
+  'Technology Manufacturing': ['Semiconductor Manufacturing', 'Semiconductors', 'Computer Hardware', 'Computer Hardware Manufacturing', 'Medical Devices & Supplies', 'Medical Devices', 'Electrical Equipment', 'Electronics Manufacturing', 'Test & Measurement'],
+  'Industrial & Defense': ['Aerospace & Defense', 'Aerospace & Defense Manufacturing', 'Automotive', 'Automotive Manufacturing', 'Industrial Machinery & Equipment', 'Industrial Machinery', 'Packaging & Containers', 'Building Materials', 'Shipbuilding', 'Railroad Equipment']
+};
+
+const TIMING_TRIGGERS = [
+  { id: 'vp_ld_hiring', label: 'VP/Head-Level L&D Hiring Detected', desc: 'Company may be hiring senior learning leadership — may signal new or expanding training initiatives.', dataSource: 'Found via: job boards, LinkedIn, company careers pages' },
+  { id: 'ma_activity', label: 'M&A Activity Detected', desc: 'Recent merger or acquisition may create integration needs, onboarding at scale, and process standardization.', dataSource: 'Found via: SEC filings, press releases, news aggregation' },
+  { id: 'compliance_deadline', label: 'Regulatory Compliance Deadline Detected', desc: 'Regulatory deadlines approaching that may require documented training (OSHA, ISO, SEC, FINRA, etc.).', dataSource: 'Found via: regulatory filings, news, company website' },
+  { id: 'digital_transformation', label: 'Digital Transformation or Learning Initiative Detected', desc: 'Active digital transformation or modernization initiative — may include upgrading training infrastructure.', dataSource: 'Found via: press releases, company website, news' },
+  { id: 'new_leadership', label: 'New Executive Leadership Detected', desc: 'New CEO, CTO, or CHRO within past 12 months — new leaders may invest in enablement tools.', dataSource: 'Found via: press releases, LinkedIn, news' },
+  { id: 'geographic_expansion', label: 'Geographic Expansion Detected', desc: 'Opening new facilities or entering new markets — distributed training needs may increase.', dataSource: 'Found via: news, company website, careers page' }
+];
+
+const SIGNAL_DEFS = [
+  { id: 'lms', label: 'LMS / Training Platform Detection', question: 'How should LMS or training platform detection influence the score?', desc: 'Companies with existing LMS investment may be higher-value prospects for video learning solutions.', dataSource: 'Found via: ZoomInfo technographics, company website scraping' },
+  { id: 'website', label: 'Website Training Content', question: 'How should training-related website content influence the score?', desc: 'Training-related website content may signal organizational commitment to L&D.', dataSource: 'Found via: Company website analysis (homepage, /careers, /training, /resources)' },
+  { id: 'jobs', label: 'Job Market Signals', question: 'How should active L&D job postings influence the score?', desc: 'Active L&D hiring may indicate dedicated budget and learning initiatives.', dataSource: 'Found via: Job board APIs, company careers pages' },
+  { id: 'news', label: 'News & Event Signals', question: 'How should public training commitments in the news influence the score?', desc: 'Companies making public commitments to training may be active prospects for video platforms.', dataSource: 'Found via: News aggregation, press releases, SEC filings' }
+];
+
+function getDefaults(segment) {
+  return {
+    fit: {
+      employeeChoice: 'no_distinction',
+      employeeCustomMin: segment === 'mfg' ? 3000 : 2000,
+      employeeCustomMax: segment === 'mfg' ? 10000 : 8000,
+      revenueChoice: 'no_distinction',
+      revenueCustomMin: 1,
+      revenueCustomMax: 3,
+      locationChoice: 'no_distinction',
+      ldTeamImportance: 1,
+      ldOrgMaturity: 'high'
+    },
+    signals: {
+      competitor: 'auto_tier_a',
+      lms: 'standard',
+      website: 'standard',
+      jobs: 'standard',
+      news: 'standard'
+    },
+    timing: {
+      triggers: {
+        vp_ld_hiring: 'standard',
+        ma_activity: 'standard',
+        compliance_deadline: 'standard',
+        digital_transformation: 'standard',
+        new_leadership: 'standard',
+        geographic_expansion: 'standard'
+      }
+    },
+    weights: { fit: 33, signals: 33, timing: 34 },
+    thresholds: { tierA: 80, tierB: 60 }
+  };
+}
+
+// =====================================================================
+// STATE
+// =====================================================================
+
+const STEPS = ['landing', 'universe', 'fit', 'signals', 'timing', 'weights', 'review'];
+const STEP_LABELS = {
+  universe: 'Target Accounts',
+  fit: 'FIT',
+  signals: 'Signals',
+  timing: 'Timing',
+  weights: 'Weights',
+  review: 'Review'
+};
+
+let currentStepIndex = 0;
+let config = {
+  mfg: getDefaults('mfg'),
+  fin: getDefaults('fin')
+};
+
+// Universe narrowing (Mfg only)
+let universeConfig = {
+  subIndustries: [],
+  employeeMin: 1000,
+  employeeMax: 25000,
+  revenueMin: 0,
+  revenueMax: 5,
+  locationsMin: 0,
+  ownership: 'both'
+};
+
+let universeData = [];
+let universeLoaded = false;
+
+// =====================================================================
+// HELPER: segment-prefixed element access
+// =====================================================================
+
+function el(seg, name) { return document.getElementById(seg + '-' + name); }
+
+// =====================================================================
+// CSV PARSING & REVENUE PARSING
+// =====================================================================
+
+function parseCSV(text) {
+  const rows = [];
+  let current = '';
+  let inQuotes = false;
+  let row = [];
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < text.length && text[i + 1] === '"') { current += '"'; i++; }
+        else { inQuotes = false; }
+      } else { current += ch; }
+    } else {
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { row.push(current.trim()); current = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && i + 1 < text.length && text[i + 1] === '\n') i++;
+        row.push(current.trim()); current = '';
+        if (row.length > 1 || (row.length === 1 && row[0] !== '')) rows.push(row);
+        row = [];
+      } else { current += ch; }
+    }
+  }
+  row.push(current.trim());
+  if (row.length > 1 || (row.length === 1 && row[0] !== '')) rows.push(row);
+  return rows;
+}
+
+function parseRevenue(raw) {
+  if (!raw) return 0;
+  const s = String(raw).replace(/[$,\s]/g, '');
+  const match = s.match(/^([0-9.]+)\s*([BMKbmk])?/);
+  if (!match) return 0;
+  const num = parseFloat(match[1]);
+  if (isNaN(num)) return 0;
+  const suffix = (match[2] || '').toUpperCase();
+  if (suffix === 'B') return num * 1000;
+  if (suffix === 'M') return num;
+  if (suffix === 'K') return num / 1000;
+  if (num > 100000) return num / 1000000;
+  return num;
+}
+
+function fmt(n) { return n.toLocaleString('en-US'); }
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+// =====================================================================
+// GOOGLE SHEETS DATA FETCH
+// =====================================================================
+
+async function fetchUniverseData(gid) {
+  // Try local CSV first (works on any protocol), fall back to Google Sheets
+  const localFile = gid === MFG_GID ? 'mfg-universe.csv' : 'fin-universe.csv';
+  let text;
+  try {
+    const localResp = await fetch(localFile);
+    if (localResp.ok) {
+      text = await localResp.text();
+    } else {
+      throw new Error('Local file not found');
+    }
+  } catch (localErr) {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    text = await response.text();
+  }
+  const rows = parseCSV(text);
+  if (rows.length < 2) return [];
+  const headers = rows[0].map(h => h.toLowerCase().trim());
+  const data = [];
+  for (let i = 1; i < rows.length; i++) {
+    const obj = {};
+    for (let j = 0; j < headers.length; j++) {
+      obj[headers[j]] = rows[i][j] || '';
+    }
+    data.push(obj);
+  }
+  return data;
+}
+
+function findColumn(data, ...candidates) {
+  if (data.length === 0) return null;
+  const keys = Object.keys(data[0]);
+  for (const c of candidates) {
+    const cl = c.toLowerCase();
+    const found = keys.find(k => k.toLowerCase().includes(cl));
+    if (found) return found;
+  }
+  return null;
+}
+
+async function loadMfgUniverse() {
+  const loading = document.getElementById('universe-loading');
+  const filters = document.getElementById('universe-filters');
+  loading.style.display = 'flex';
+  filters.style.display = 'none';
+  try {
+    const data = await fetchUniverseData(MFG_GID);
+    universeData = data;
+    universeLoaded = true;
+    loading.style.display = 'none';
+    filters.style.display = 'block';
+    buildUniverseFilters(data);
+    applyUniverseFilters();
+  } catch (e) {
+    loading.style.display = 'none';
+    console.warn('Live data fetch failed. Using estimated data.', e.message);
+    const fallbackData = generateFallbackData();
+    universeData = fallbackData;
+    universeLoaded = true;
+    filters.style.display = 'block';
+    buildUniverseFilters(fallbackData);
+    applyUniverseFilters();
+    const notice = document.createElement('div');
+    notice.className = 'info-callout';
+    notice.style.marginBottom = '16px';
+    notice.innerHTML = '<span class="icon">&#x2139;</span><span>Using representative data for preview. Live account data loads when served via HTTPS.</span>';
+    filters.insertBefore(notice, filters.firstChild);
+  }
+}
+
+function generateFallbackData() {
+  const subIndustries = [
+    { name: 'Food & Beverage Manufacturing', count: 520 },
+    { name: 'Industrial Machinery & Equipment', count: 410 },
+    { name: 'Chemical Manufacturing', count: 380 },
+    { name: 'Automotive Manufacturing', count: 310 },
+    { name: 'Computer Hardware', count: 280 },
+    { name: 'Aerospace & Defense', count: 260 },
+    { name: 'Medical Devices & Supplies', count: 240 },
+    { name: 'Plastics & Rubber Manufacturing', count: 210 },
+    { name: 'Metal & Steel Manufacturing', count: 195 },
+    { name: 'Consumer Products Manufacturing', count: 180 },
+    { name: 'Packaging & Containers', count: 165 },
+    { name: 'Semiconductor Manufacturing', count: 150 },
+    { name: 'Building Materials', count: 130 },
+    { name: 'Paper & Forest Products', count: 110 },
+    { name: 'Textile Manufacturing', count: 95 },
+    { name: 'Electrical Equipment', count: 85 },
+    { name: 'Petroleum & Fuel Products', count: 75 },
+    { name: 'Glass, Ceramics & Concrete', count: 60 },
+    { name: 'Consumer Electronics', count: 50 },
+    { name: 'Other Manufacturing', count: 118 }
+  ];
+  const data = [];
+  const ownershipTypes = ['Public', 'Private'];
+  subIndustries.forEach(sub => {
+    for (let i = 0; i < sub.count; i++) {
+      const emp = Math.floor(1000 + Math.random() * 24000);
+      const revM = Math.floor(50 + Math.random() * 4950);
+      const locs = Math.floor(1 + Math.random() * 80);
+      data.push({
+        'sub-industry': sub.name,
+        'employees': String(emp),
+        'revenue': `$${revM}M`,
+        'locations': String(locs),
+        'ownership type': ownershipTypes[Math.random() > 0.4 ? 1 : 0]
+      });
+    }
+  });
+  return data;
+}
+
+// =====================================================================
+// UNIVERSE FILTER BUILDING
+// =====================================================================
+
+function buildUniverseFilters(data) {
+  const subCol = findColumn(data, 'sub-industry', 'subindustry', 'sub industry');
+  if (!subCol) return;
+  const subCounts = {};
+  data.forEach(row => {
+    const sub = row[subCol] || 'Unknown';
+    subCounts[sub] = (subCounts[sub] || 0) + 1;
+  });
+  const sorted = Object.entries(subCounts).sort((a, b) => b[1] - a[1]);
+  const topN = sorted.slice(0, 10);
+  universeConfig.subIndustries = sorted.map(s => s[0]);
+  const priorityContainer = document.getElementById('priority-subs');
+  priorityContainer.innerHTML = '';
+  topN.forEach(([name, count]) => {
+    const label = document.createElement('label');
+    label.className = 'sub-check';
+    label.innerHTML = `<input type="checkbox" checked data-sub="${esc(name)}" onchange="toggleSubIndustry(this)"><span class="name">${esc(name)}</span><span class="count">${count}</span>`;
+    priorityContainer.appendChild(label);
+  });
+  const remaining = sorted.slice(10);
+  const groupedContainer = document.getElementById('grouped-subs');
+  groupedContainer.innerHTML = '';
+  const grouped = {};
+  remaining.forEach(([name, count]) => {
+    let assigned = false;
+    for (const [groupName, members] of Object.entries(MFG_SUB_GROUPS)) {
+      if (members.some(m => name.toLowerCase().includes(m.toLowerCase()) || m.toLowerCase().includes(name.toLowerCase()))) {
+        if (!grouped[groupName]) grouped[groupName] = [];
+        grouped[groupName].push({ name, count });
+        assigned = true;
+        break;
+      }
+    }
+    if (!assigned) {
+      if (!grouped['Other']) grouped['Other'] = [];
+      grouped['Other'].push({ name, count });
+    }
+  });
+  for (const [groupName, items] of Object.entries(grouped)) {
+    const totalCount = items.reduce((s, i) => s + i.count, 0);
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <div class="group-header" onclick="toggleGroup(this)">
+        <span class="arrow">&#9654;</span>
+        <span class="group-name">${esc(groupName)}</span>
+        <span class="group-count">${totalCount} accounts</span>
+      </div>
+      <div class="group-items">${items.map(i =>
+        `<label class="sub-check"><input type="checkbox" checked data-sub="${esc(i.name)}" onchange="toggleSubIndustry(this)"><span class="name">${esc(i.name)}</span><span class="count">${i.count}</span></label>`
+      ).join('')}</div>`;
+    groupedContainer.appendChild(wrapper);
+  }
+}
+
+function toggleGroup(header) {
+  const arrow = header.querySelector('.arrow');
+  const items = header.nextElementSibling;
+  arrow.classList.toggle('open');
+  items.classList.toggle('open');
+}
+
+function toggleSubIndustry(checkbox) {
+  const sub = checkbox.dataset.sub;
+  const subs = universeConfig.subIndustries;
+  if (checkbox.checked && !subs.includes(sub)) subs.push(sub);
+  else if (!checkbox.checked) {
+    const idx = subs.indexOf(sub);
+    if (idx > -1) subs.splice(idx, 1);
+  }
+  applyUniverseFilters();
+}
+
+// =====================================================================
+// UNIVERSE FILTERING
+// =====================================================================
+
+function applyUniverseFilters() {
+  if (!universeLoaded) return;
+  const data = universeData;
+  const cfg = universeConfig;
+  const subCol = findColumn(data, 'sub-industry', 'subindustry', 'sub industry');
+  const empCol = findColumn(data, 'employees', 'employee');
+  const revCol = findColumn(data, 'revenue');
+  const locCol = findColumn(data, 'locations', 'location');
+  const ownCol = findColumn(data, 'ownership', 'type');
+  let count = 0;
+  const total = data.length;
+  data.forEach(row => {
+    let pass = true;
+    if (subCol && cfg.subIndustries.length > 0) {
+      const sub = row[subCol] || 'Unknown';
+      if (!cfg.subIndustries.includes(sub)) pass = false;
+    }
+    if (pass && empCol) {
+      const emp = parseInt(String(row[empCol]).replace(/,/g, '')) || 0;
+      if (emp > 0 && (emp < cfg.employeeMin || emp > cfg.employeeMax)) pass = false;
+    }
+    if (pass && revCol) {
+      const rev = parseRevenue(row[revCol]);
+      if (rev > 0) {
+        const minRev = REVENUE_BRACKETS[cfg.revenueMin] ? REVENUE_BRACKETS[cfg.revenueMin].min : 0;
+        const maxRev = REVENUE_BRACKETS[cfg.revenueMax] ? REVENUE_BRACKETS[cfg.revenueMax].max : Infinity;
+        if (rev < minRev || rev > maxRev) pass = false;
+      }
+    }
+    if (pass && locCol && cfg.locationsMin > 0) {
+      const loc = parseInt(String(row[locCol]).replace(/,/g, '')) || 0;
+      if (loc > 0 && loc < cfg.locationsMin) pass = false;
+    }
+    if (pass && ownCol && cfg.ownership !== 'both') {
+      const own = (row[ownCol] || '').toLowerCase();
+      if (cfg.ownership === 'public' && !own.includes('public')) pass = false;
+      if (cfg.ownership === 'private' && !own.includes('private')) pass = false;
+    }
+    if (pass) count++;
+  });
+  document.getElementById('counter-value').textContent = fmt(count);
+  document.getElementById('counter-total').textContent = fmt(total);
+  const target = document.getElementById('counter-target');
+  const pct = Math.abs(count - 500) / 500;
+  if (pct <= 0.1) { target.className = 'target-indicator target-green'; target.textContent = `${fmt(count)} ~ Target: ~500`; }
+  else if (pct <= 0.25) { target.className = 'target-indicator target-yellow'; target.textContent = `Target: ~500`; }
+  else { target.className = 'target-indicator target-red'; target.textContent = `Target: ~500`; }
+
+  // Gate Continue button: enable only when count is within 25% of 500 (375-625)
+  const continueBtn = document.getElementById('universe-continue-btn');
+  if (continueBtn) {
+    const inRange = count >= 375 && count <= 625;
+    continueBtn.disabled = !inRange;
+    continueBtn.title = inRange ? '' : `Adjust filters to reach ~500 accounts (currently ${fmt(count)})`;
+  }
+}
+
+function setOwnership(val, btn) {
+  universeConfig.ownership = val;
+  btn.parentElement.querySelectorAll('.ownership-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyUniverseFilters();
+}
+
+// =====================================================================
+// NAVIGATION
+// =====================================================================
+
+function getCurrentStepId() { return STEPS[currentStepIndex]; }
+
+function showStep(stepId) {
+  document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+  const stepEl = document.getElementById('step-' + stepId);
+  if (stepEl) stepEl.classList.add('active');
+
+  // Show/hide step bar and adjust main margin
+  const mainEl = document.getElementById('main-content');
+  const stepBar = document.getElementById('step-bar');
+  if (stepId === 'landing') {
+    stepBar.classList.remove('visible');
+    mainEl.classList.remove('with-step-bar');
+  } else {
+    stepBar.classList.add('visible');
+    mainEl.classList.add('with-step-bar');
+  }
+
+  updateStepBar();
+  if (stepId === 'fit') renderFitColumns();
+  if (stepId === 'signals') renderSignalsColumns();
+  if (stepId === 'timing') renderTimingColumns();
+  if (stepId === 'weights') renderWeightsColumns();
+  if (stepId === 'review') renderReviewColumns();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  encodeState();
+}
+
+function beginConfiguration() {
+  currentStepIndex = 1; // universe
+  showStep('universe');
+}
+
+function goToLanding() {
+  currentStepIndex = 0;
+  showStep('landing');
+}
+
+function nextStep() {
+  if (currentStepIndex < STEPS.length - 1) {
+    syncFromDOM();
+    currentStepIndex++;
+    showStep(STEPS[currentStepIndex]);
+  }
+}
+
+function prevStep() {
+  if (currentStepIndex > 1) {
+    syncFromDOM();
+    currentStepIndex--;
+    showStep(STEPS[currentStepIndex]);
+  } else if (currentStepIndex === 1) {
+    goToLanding();
+  }
+}
+
+function goToStep(idx) {
+  // Allow going to any step up to current + 1
+  if (idx >= 1 && idx <= currentStepIndex + 1 && idx < STEPS.length) {
+    syncFromDOM();
+    currentStepIndex = idx;
+    showStep(STEPS[idx]);
+  }
+}
+
+// =====================================================================
+// HORIZONTAL STEP BAR
+// =====================================================================
+
+function updateStepBar() {
+  const bar = document.getElementById('step-bar');
+  const displaySteps = STEPS.slice(1); // exclude landing
+  let html = '';
+  displaySteps.forEach((s, i) => {
+    const stepNum = i + 1;
+    const realIdx = i + 1; // index in STEPS array
+    let cls = 'step-bar-item';
+    if (realIdx === currentStepIndex) cls += ' active';
+    else if (realIdx < currentStepIndex) cls += ' completed';
+    else if (realIdx > currentStepIndex + 1) cls += ' disabled';
+
+    if (i > 0) {
+      const connCls = realIdx <= currentStepIndex ? 'step-bar-connector completed' : 'step-bar-connector';
+      html += `<div class="${connCls}"></div>`;
+    }
+    html += `<button class="${cls}" onclick="goToStep(${realIdx})"><span class="step-dot">${realIdx < currentStepIndex ? '&#10003;' : stepNum}</span><span>${STEP_LABELS[s]}</span></button>`;
+  });
+  bar.innerHTML = html;
+}
+
+// =====================================================================
+// RENDER: FIT COLUMNS (dual)
+// =====================================================================
+
+function renderFitColumns() {
+  const container = document.getElementById('fit-columns');
+  container.innerHTML = ['mfg', 'fin'].map(seg => {
+    const c = config[seg];
+    const isMfg = seg === 'mfg';
+    const empRange = isMfg ? '1,000-25,000' : '1,000-10,000';
+    const colCls = seg === 'mfg' ? 'mfg' : 'fin';
+    const colLabel = isMfg ? 'Manufacturing' : 'Non-Banking Finance';
+
+    return `
+    <div class="col-${seg === 'mfg' ? 'mfg' : 'fin'}">
+      <h3 class="col-header ${colCls}"><span class="col-dot"></span>${colLabel}</h3>
+
+      <!-- Employee Count -->
+      <div class="card">
+        <div class="card-header-bar">Employee Count Preference</div>
+        <div class="control-label">Should certain company sizes score higher?</div>
+        <div class="radio-group" id="${seg}-emp-radios">
+          <label class="radio-choice ${c.fit.employeeChoice === 'no_distinction' ? 'selected' : ''}" onclick="setFitRadio('${seg}','employee','no_distinction',this)">
+            <input type="radio" name="${seg}-emp" value="no_distinction" ${c.fit.employeeChoice === 'no_distinction' ? 'checked' : ''}>
+            <div><div class="radio-choice-label">No distinction — all sizes equally qualified within the ICP range</div>
+            <div class="radio-choice-desc">ICP range: ${empRange} employees</div></div>
+          </label>
+          <label class="radio-choice ${c.fit.employeeChoice === 'larger_higher' ? 'selected' : ''}" onclick="setFitRadio('${seg}','employee','larger_higher',this)">
+            <input type="radio" name="${seg}-emp" value="larger_higher" ${c.fit.employeeChoice === 'larger_higher' ? 'checked' : ''}>
+            <div><div class="radio-choice-label">Larger companies are generally stronger prospects</div></div>
+          </label>
+          <label class="radio-choice ${c.fit.employeeChoice === 'custom' ? 'selected' : ''}" onclick="setFitRadio('${seg}','employee','custom',this)">
+            <input type="radio" name="${seg}-emp" value="custom" ${c.fit.employeeChoice === 'custom' ? 'checked' : ''}>
+            <div>
+              <div class="radio-choice-label">Custom sweet spot</div>
+              <div class="custom-range-inputs ${c.fit.employeeChoice === 'custom' ? 'visible' : ''}" id="${seg}-emp-custom">
+                <input type="number" id="${seg}-emp-custom-min" value="${c.fit.employeeCustomMin}" min="1000" step="500" placeholder="Min">
+                <span class="range-sep">to</span>
+                <input type="number" id="${seg}-emp-custom-max" value="${c.fit.employeeCustomMax}" min="1000" step="500" placeholder="Max">
+                <span class="range-sep">employees</span>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Revenue -->
+      <div class="card">
+        <div class="card-header-bar">Revenue Preference</div>
+        <div class="control-label">Should certain revenue levels score higher?</div>
+        <div class="radio-group" id="${seg}-rev-radios">
+          <label class="radio-choice ${c.fit.revenueChoice === 'no_distinction' ? 'selected' : ''}" onclick="setFitRadio('${seg}','revenue','no_distinction',this)">
+            <input type="radio" name="${seg}-rev" value="no_distinction" ${c.fit.revenueChoice === 'no_distinction' ? 'checked' : ''}>
+            <div><div class="radio-choice-label">No distinction — all revenue levels equally qualified</div></div>
+          </label>
+          <label class="radio-choice ${c.fit.revenueChoice === 'higher_higher' ? 'selected' : ''}" onclick="setFitRadio('${seg}','revenue','higher_higher',this)">
+            <input type="radio" name="${seg}-rev" value="higher_higher" ${c.fit.revenueChoice === 'higher_higher' ? 'checked' : ''}>
+            <div><div class="radio-choice-label">Higher revenue companies are generally stronger prospects</div></div>
+          </label>
+          <label class="radio-choice ${c.fit.revenueChoice === 'custom' ? 'selected' : ''}" onclick="setFitRadio('${seg}','revenue','custom',this)">
+            <input type="radio" name="${seg}-rev" value="custom" ${c.fit.revenueChoice === 'custom' ? 'checked' : ''}>
+            <div>
+              <div class="radio-choice-label">Custom sweet spot</div>
+              <div class="custom-range-inputs ${c.fit.revenueChoice === 'custom' ? 'visible' : ''}" id="${seg}-rev-custom">
+                <select id="${seg}-rev-custom-min" style="width:100px; padding:6px; border:1.5px solid var(--border-light); border-radius:6px; font-family:'Instrument Sans'; font-size:16px;">
+                  ${REV_SWEET_LABELS.map((l, i) => `<option value="${i}" ${i === c.fit.revenueCustomMin ? 'selected' : ''}>${l}</option>`).join('')}
+                </select>
+                <span class="range-sep">to</span>
+                <select id="${seg}-rev-custom-max" style="width:100px; padding:6px; border:1.5px solid var(--border-light); border-radius:6px; font-family:'Instrument Sans'; font-size:16px;">
+                  ${REV_SWEET_LABELS.map((l, i) => `<option value="${i}" ${i === c.fit.revenueCustomMax ? 'selected' : ''}>${l}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Location Importance -->
+      <div class="card">
+        <div class="card-header-bar">Location Count</div>
+        <div class="control-label">Should companies with many locations score higher?</div>
+        <div class="radio-group" id="${seg}-loc-radios">
+          <label class="radio-choice ${c.fit.locationChoice === 'no_distinction' ? 'selected' : ''}" onclick="setFitRadio('${seg}','location','no_distinction',this)">
+            <input type="radio" name="${seg}-loc" value="no_distinction" ${c.fit.locationChoice === 'no_distinction' ? 'checked' : ''}>
+            <div><div class="radio-choice-label">No distinction — location count doesn't affect scoring</div></div>
+          </label>
+          <label class="radio-choice ${c.fit.locationChoice === 'yes_moderate' ? 'selected' : ''}" onclick="setFitRadio('${seg}','location','yes_moderate',this)">
+            <input type="radio" name="${seg}-loc" value="yes_moderate" ${c.fit.locationChoice === 'yes_moderate' ? 'checked' : ''}>
+            <div><div class="radio-choice-label">Yes — more locations may mean a stronger use case for Panopto</div></div>
+          </label>
+          <label class="radio-choice ${c.fit.locationChoice === 'yes_strong' ? 'selected' : ''}" onclick="setFitRadio('${seg}','location','yes_strong',this)">
+            <input type="radio" name="${seg}-loc" value="yes_strong" ${c.fit.locationChoice === 'yes_strong' ? 'checked' : ''}>
+            <div><div class="radio-choice-label">Yes, significantly — multi-location may be a strong indicator</div></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- L&D Team Importance -->
+      <div class="card">
+        <div class="card-header-bar">L&amp;D Team Presence</div>
+        <div class="control-label">How important is having a dedicated L&amp;D team?</div>
+        <div class="radio-group" id="${seg}-ld-radios">
+          <label class="radio-choice ${c.fit.ldTeamImportance === 0 ? 'selected' : ''}" onclick="setLdTeam('${seg}', 0, this)">
+            <input type="radio" name="${seg}-ld" value="0" ${c.fit.ldTeamImportance === 0 ? 'checked' : ''}>
+            <div><div class="radio-choice-label">Not Important</div></div>
+          </label>
+          <label class="radio-choice ${c.fit.ldTeamImportance === 1 ? 'selected' : ''}" onclick="setLdTeam('${seg}', 1, this)">
+            <input type="radio" name="${seg}-ld" value="1" ${c.fit.ldTeamImportance === 1 ? 'checked' : ''}>
+            <div><div class="radio-choice-label">Important</div></div>
+          </label>
+          <label class="radio-choice ${c.fit.ldTeamImportance === 2 ? 'selected' : ''}" onclick="setLdTeam('${seg}', 2, this)">
+            <input type="radio" name="${seg}-ld" value="2" ${c.fit.ldTeamImportance === 2 ? 'checked' : ''}>
+            <div><div class="radio-choice-label">Very Important</div></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- L&D Org Maturity -->
+      <div class="card">
+        <div class="card-header-bar">L&amp;D Team Size &amp; Maturity</div>
+        <div class="control-group">
+          <div class="control-label">How much should the size and maturity of a company's L&amp;D organization influence the FIT score?</div>
+          <div class="control-hint">Based on the number of L&amp;D/training employees and organizational structure — detecting VP-level L&amp;D leadership, dedicated training departments, team size, or entry-level training roles.</div>
+          <div class="maturity-toggle" id="${seg}-maturity-toggle" style="margin-top:8px;">
+            <button class="maturity-btn ${c.fit.ldOrgMaturity === 'high' ? 'active' : ''}" data-value="high" onclick="setMaturity('${seg}', 'high', this)">High</button>
+            <button class="maturity-btn ${c.fit.ldOrgMaturity === 'medium' ? 'active' : ''}" data-value="medium" onclick="setMaturity('${seg}', 'medium', this)">Medium</button>
+            <button class="maturity-btn ${c.fit.ldOrgMaturity === 'low' ? 'active' : ''}" data-value="low" onclick="setMaturity('${seg}', 'low', this)">Low</button>
+            <button class="maturity-btn ${c.fit.ldOrgMaturity === 'off' ? 'active' : ''}" data-value="off" onclick="setMaturity('${seg}', 'off', this)">Off</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${seg === 'mfg' ? '<div class="col-divider"></div>' : ''}`;
+  }).join('');
+}
+
+// =====================================================================
+// RENDER: SIGNALS COLUMNS (dual)
+// =====================================================================
+
+function renderSignalsColumns() {
+  const container = document.getElementById('signals-columns');
+  container.innerHTML = ['mfg', 'fin'].map(seg => {
+    const c = config[seg];
+    const colCls = seg === 'mfg' ? 'mfg' : 'fin';
+    const colLabel = seg === 'mfg' ? 'Manufacturing' : 'Non-Banking Finance';
+
+    return `
+    <div class="col-${seg === 'mfg' ? 'mfg' : 'fin'}">
+      <h3 class="col-header ${colCls}"><span class="col-dot"></span>${colLabel}</h3>
+
+      <!-- Competitor Detection -->
+      <div class="card">
+        <div class="card-header-bar">Competitor Platform Detection</div>
+        <div class="card-description">When a competing video platform is detected (Kaltura, Echo360, Mediasite, YuJa, etc.), how should the system respond?</div>
+        <div class="signal-row" style="border-bottom:none; padding-top:0;">
+          <div class="signal-row-top">
+            <div class="signal-info">
+              <div class="signal-name">Detection Action</div>
+              <div class="signal-desc">A company already paying for enterprise video may always be a strong prospect.</div>
+            </div>
+            <div class="action-select" id="${seg}-competitor-chips">
+              <button class="action-chip ${c.signals.competitor === 'auto_tier_a' ? 'active' : ''}" data-value="auto_tier_a" onclick="setCompetitorAction('${seg}', 'auto_tier_a', this)">Auto Tier A</button>
+              <button class="action-chip ${c.signals.competitor === 'bonus' ? 'active' : ''}" data-value="bonus" onclick="setCompetitorAction('${seg}', 'bonus', this)">Score Bonus</button>
+              <button class="action-chip ${c.signals.competitor === 'flag' ? 'active' : ''}" data-value="flag" onclick="setCompetitorAction('${seg}', 'flag', this)">No Bonus (Flag Only)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signal Sources -->
+      <div class="card">
+        <div class="card-header-bar">Signal Sources</div>
+        ${SIGNAL_DEFS.map(sig => `
+          <div class="signal-row">
+            <div class="card-description" style="font-size:18px; margin-bottom:8px; font-weight:600; color:var(--text-primary);">${sig.question}</div>
+            <div class="signal-row-top">
+              <div class="signal-info">
+                <div class="signal-name">${sig.label}</div>
+                <div class="signal-desc">${sig.desc}</div>
+                <div class="data-source"><span class="ds-icon">&#128269;</span> ${sig.dataSource}</div>
+              </div>
+              <div class="signal-radio-group" id="${seg}-sig-${sig.id}">
+                <button class="signal-radio ${c.signals[sig.id] === 'standard' ? 'active' : ''}" onclick="setSignalLevel('${seg}','${sig.id}','standard',this)">Standard</button>
+                <button class="signal-radio ${c.signals[sig.id] === 'priority' ? 'active' : ''}" onclick="setSignalLevel('${seg}','${sig.id}','priority',this)">Priority</button>
+                <button class="signal-radio skip ${c.signals[sig.id] === 'skip' ? 'active' : ''}" onclick="setSignalLevel('${seg}','${sig.id}','skip',this)">Skip</button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    ${seg === 'mfg' ? '<div class="col-divider"></div>' : ''}`;
+  }).join('');
+}
+
+// =====================================================================
+// RENDER: TIMING COLUMNS (dual)
+// =====================================================================
+
+function renderTimingColumns() {
+  const container = document.getElementById('timing-columns');
+  container.innerHTML = ['mfg', 'fin'].map(seg => {
+    const c = config[seg];
+    const colCls = seg === 'mfg' ? 'mfg' : 'fin';
+    const colLabel = seg === 'mfg' ? 'Manufacturing' : 'Non-Banking Finance';
+
+    return `
+    <div class="col-${seg === 'mfg' ? 'mfg' : 'fin'}">
+      <h3 class="col-header ${colCls}"><span class="col-dot"></span>${colLabel}</h3>
+
+      <div class="card">
+        <div class="card-header-bar">Timing Trigger Importance</div>
+        <div class="card-description">When these timing signals are detected, how important is each to scoring? All default to Standard.</div>
+
+        ${TIMING_TRIGGERS.map(t => {
+          const val = c.timing.triggers[t.id] || 'standard';
+          return `
+          <div class="signal-row">
+            <div class="signal-row-top">
+              <div class="signal-info">
+                <div class="signal-name">${t.label}</div>
+                <div class="signal-desc">${t.desc}</div>
+                <div class="data-source"><span class="ds-icon">&#128269;</span> ${t.dataSource}</div>
+              </div>
+              <div class="signal-radio-group" id="${seg}-trigger-${t.id}">
+                <button class="signal-radio ${val === 'high_priority' ? 'active' : ''}" onclick="setTriggerLevel('${seg}','${t.id}','high_priority',this)">High Priority</button>
+                <button class="signal-radio ${val === 'standard' ? 'active' : ''}" onclick="setTriggerLevel('${seg}','${t.id}','standard',this)">Standard</button>
+                <button class="signal-radio skip ${val === 'not_relevant' ? 'active' : ''}" onclick="setTriggerLevel('${seg}','${t.id}','not_relevant',this)">Not Relevant</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    ${seg === 'mfg' ? '<div class="col-divider"></div>' : ''}`;
+  }).join('');
+}
+
+// =====================================================================
+// RENDER: WEIGHTS + THRESHOLDS COLUMNS (dual)
+// =====================================================================
+
+function renderWeightsColumns() {
+  const container = document.getElementById('weights-columns');
+  container.innerHTML = ['mfg', 'fin'].map(seg => {
+    const c = config[seg];
+    const colCls = seg === 'mfg' ? 'mfg' : 'fin';
+    const colLabel = seg === 'mfg' ? 'Manufacturing' : 'Non-Banking Finance';
+
+    return `
+    <div class="col-${seg === 'mfg' ? 'mfg' : 'fin'}">
+      <h3 class="col-header ${colCls}"><span class="col-dot"></span>${colLabel}</h3>
+
+      <!-- Weight Allocation -->
+      <div class="card">
+        <div class="card-header-bar">Dimension Weight Allocation</div>
+        <div class="card-description">By default, each dimension is weighted equally (~33% each). If you'd like to adjust emphasis — for example, placing higher priority on behavioral signals — you can change these values. Weights must sum to 100.</div>
+
+        <div class="weight-display" id="${seg}-weight-bars">
+          <div class="weight-bar fit" id="${seg}-weight-bar-fit" style="flex:${c.weights.fit};">FIT ${c.weights.fit}%</div>
+          <div class="weight-bar signals" id="${seg}-weight-bar-signals" style="flex:${c.weights.signals};">SIGNALS ${c.weights.signals}%</div>
+          <div class="weight-bar timing" id="${seg}-weight-bar-timing" style="flex:${c.weights.timing};">TIMING ${c.weights.timing}%</div>
+        </div>
+
+        <div class="weight-inputs">
+          <div class="weight-input-group">
+            <label class="fit">FIT</label>
+            <div class="weight-dimension-hint">Company size, revenue, locations, L&amp;D team presence and maturity</div>
+            <input type="number" id="${seg}-weight-fit" min="0" max="100" step="1" value="${c.weights.fit}" onchange="updateSegWeights('${seg}')">
+          </div>
+          <div class="weight-input-group">
+            <label class="signals">SIGNALS</label>
+            <div class="weight-dimension-hint">LMS/training platforms, website content, job market signals, news coverage</div>
+            <input type="number" id="${seg}-weight-signals" min="0" max="100" step="1" value="${c.weights.signals}" onchange="updateSegWeights('${seg}')">
+          </div>
+          <div class="weight-input-group">
+            <label class="timing">TIMING</label>
+            <div class="weight-dimension-hint">Leadership hiring, M&amp;A activity, compliance deadlines, digital transformation, expansion</div>
+            <input type="number" id="${seg}-weight-timing" min="0" max="100" step="1" value="${c.weights.timing}" onchange="updateSegWeights('${seg}')">
+          </div>
+        </div>
+
+        <div class="weight-validation" id="${seg}-weight-validation">Total: ${c.weights.fit + c.weights.signals + c.weights.timing} &mdash; Valid</div>
+      </div>
+
+      <!-- Tier Thresholds -->
+      <div class="card">
+        <div class="card-header-bar">Tier Thresholds</div>
+        <div class="card-description">Set the Composite Score cutoffs that determine tier assignment.</div>
+
+        <div class="threshold-group">
+          <div class="threshold-row">
+            <div class="threshold-label">
+              <span class="tier-badge a">A</span>
+              <span class="badge a">Tier A &ge;</span>
+            </div>
+            <div class="threshold-slider">
+              <input type="range" id="${seg}-threshold-a" min="50" max="95" step="1" value="${c.thresholds.tierA}" oninput="updateSegThresholds('${seg}')">
+            </div>
+            <div class="threshold-value a" id="${seg}-threshold-a-value">${c.thresholds.tierA}</div>
+          </div>
+
+          <div class="threshold-row">
+            <div class="threshold-label">
+              <span class="tier-badge b">B</span>
+              <span class="badge b">Tier B &ge;</span>
+            </div>
+            <div class="threshold-slider">
+              <input type="range" id="${seg}-threshold-b" min="20" max="80" step="1" value="${c.thresholds.tierB}" oninput="updateSegThresholds('${seg}')">
+            </div>
+            <div class="threshold-value b" id="${seg}-threshold-b-value">${c.thresholds.tierB}</div>
+          </div>
+        </div>
+
+        <div id="${seg}-tier-bar">${renderTierBar(c.thresholds.tierA, c.thresholds.tierB)}</div>
+
+        <div class="tier-estimate" id="${seg}-tier-estimate">
+          ${renderTierEstimate(seg, c.thresholds.tierA, c.thresholds.tierB)}
+        </div>
+      </div>
+    </div>
+    ${seg === 'mfg' ? '<div class="col-divider"></div>' : ''}`;
+  }).join('');
+
+  // Run validation for both
+  updateSegWeights('mfg');
+  updateSegWeights('fin');
+}
+
+// =====================================================================
+// PROJECTED TIER DISTRIBUTION MODEL
+// =====================================================================
+
+function normalCDF(x, mean, sd) {
+  const z = (x - mean) / sd;
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989422804 * Math.exp(-z * z / 2);
+  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return z > 0 ? 1 - p : p;
+}
+
+function estimateTierCounts(tierA, tierB, total) {
+  const mean = 68, sd = 22;
+  const pA = 1 - normalCDF(tierA, mean, sd);
+  const pB = normalCDF(tierA, mean, sd) - normalCDF(tierB, mean, sd);
+  const pC = normalCDF(tierB, mean, sd);
+  return {
+    a: Math.round(pA * total),
+    b: Math.round(pB * total),
+    c: Math.round(pC * total)
+  };
+}
+
+function renderTierEstimate(seg, tierA, tierB) {
+  const total = seg === 'mfg' ? 500 : 467;
+  const counts = estimateTierCounts(tierA, tierB, total);
+  let warning = '';
+  if (counts.a < 100) {
+    warning = '<div class="tier-est-warning">Setting a high Tier A bar may result in fewer top-priority accounts for outreach.</div>';
+  }
+  return `<div class="tier-est-counts">
+    <span class="tier-est a">~${counts.a} Tier A</span>
+    <span class="tier-est b">~${counts.b} Tier B</span>
+    <span class="tier-est c">~${counts.c} Tier C</span>
+  </div>
+  <div class="tier-est-note">Projected distribution across ~${total} accounts based on typical scoring patterns</div>
+  ${warning}`;
+}
+
+// =====================================================================
+// RENDER: Tier Distribution Bar (from Alpha)
+// =====================================================================
+
+function renderTierBar(tA, tB) {
+  const pctA = 100 - tA;
+  const pctB = tA - tB;
+  const pctC = tB;
+  return `<div class="tier-bar-visual">
+    <div class="tier-bar-segment tier-c" style="flex:${pctC}">${pctC > 8 ? 'C (&lt;' + tB + ')' : ''}</div>
+    <div class="tier-bar-segment tier-b" style="flex:${pctB}">${pctB > 8 ? 'B (' + tB + '-' + (tA-1) + ')' : ''}</div>
+    <div class="tier-bar-segment tier-a" style="flex:${pctA}">${pctA > 8 ? 'A (' + tA + '+)' : ''}</div>
+  </div>`;
+}
+
+// =====================================================================
+// RENDER: REVIEW COLUMNS (dual)
+// =====================================================================
+
+function renderReviewColumns() {
+  syncFromDOM();
+  const container = document.getElementById('review-columns');
+  container.innerHTML = ['mfg', 'fin'].map(seg => {
+    const c = config[seg];
+    const colCls = seg === 'mfg' ? 'mfg' : 'fin';
+    const colLabel = seg === 'mfg' ? 'Manufacturing' : 'Non-Banking Finance';
+    const empLabels = { no_distinction: 'No distinction', larger_higher: 'Larger preferred', custom: `Custom: ${fmt(c.fit.employeeCustomMin)} - ${fmt(c.fit.employeeCustomMax)}` };
+    const revLabels = { no_distinction: 'No distinction', higher_higher: 'Higher preferred', custom: `Custom: ${REV_SWEET_LABELS[c.fit.revenueCustomMin]} - ${REV_SWEET_LABELS[c.fit.revenueCustomMax]}` };
+    const locLabels = { no_distinction: 'No distinction', yes_moderate: 'Moderate factor', yes_strong: 'Strong factor' };
+    const ldLabels = ['Not Important', 'Important', 'Very Important'];
+    const sigLabels = { standard: 'Standard', priority: 'Priority', skip: 'Skip' };
+    const trigLabels = { high_priority: 'High Priority', standard: 'Standard', not_relevant: 'Not Relevant' };
+
+    let html = `<div class="col-${seg === 'mfg' ? 'mfg' : 'fin'}">
+      <h3 class="col-header ${colCls}"><span class="col-dot"></span>${colLabel}</h3>`;
+
+    // Universe (Mfg only)
+    if (seg === 'mfg') {
+      const counterVal = document.getElementById('counter-value');
+      const matchText = (counterVal && counterVal.textContent !== '--') ? counterVal.textContent : 'N/A';
+      html += `<div class="review-section"><div class="review-section-title">Universe</div><div class="review-grid">
+        <div class="review-item"><div class="review-item-label">Matching Accounts</div><div class="review-item-value">${matchText}</div></div>
+        <div class="review-item"><div class="review-item-label">Ownership</div><div class="review-item-value">${universeConfig.ownership === 'both' ? 'Public & Private' : universeConfig.ownership}</div></div>
+      </div></div>`;
+    } else {
+      html += `<div class="review-section"><div class="review-section-title">Universe</div><div class="review-grid">
+        <div class="review-item review-item-full"><div class="review-item-label">Accounts</div><div class="review-item-value">All 467 ICP-qualified accounts</div></div>
+      </div></div>`;
+    }
+
+    // FIT
+    html += `<div class="review-section"><div class="review-section-title">FIT Parameters</div><div class="review-grid">
+      <div class="review-item"><div class="review-item-label">Employee</div><div class="review-item-value">${empLabels[c.fit.employeeChoice]}</div></div>
+      <div class="review-item"><div class="review-item-label">Revenue</div><div class="review-item-value">${revLabels[c.fit.revenueChoice]}</div></div>
+      <div class="review-item"><div class="review-item-label">Location Count</div><div class="review-item-value">${locLabels[c.fit.locationChoice]}</div></div>
+      <div class="review-item"><div class="review-item-label">L&D Team</div><div class="review-item-value">${ldLabels[c.fit.ldTeamImportance]}</div></div>
+      <div class="review-item"><div class="review-item-label">L&D Maturity</div><div class="review-item-value">${c.fit.ldOrgMaturity.charAt(0).toUpperCase() + c.fit.ldOrgMaturity.slice(1)}</div></div>
+    </div></div>`;
+
+    // Signals
+    html += `<div class="review-section"><div class="review-section-title">SIGNAL Parameters</div><div class="review-grid">
+      <div class="review-item"><div class="review-item-label">Competitor Detection</div><div class="review-item-value">${c.signals.competitor === 'auto_tier_a' ? 'Auto Tier A' : c.signals.competitor === 'bonus' ? 'Score Bonus' : 'Flag Only'}</div></div>`;
+    SIGNAL_DEFS.forEach(sig => {
+      html += `<div class="review-item"><div class="review-item-label">${sig.label}</div><div class="review-item-value">${sigLabels[c.signals[sig.id]]}</div></div>`;
+    });
+    html += `</div></div>`;
+
+    // Timing
+    html += `<div class="review-section"><div class="review-section-title">TIMING Parameters</div><div class="review-grid">`;
+    TIMING_TRIGGERS.forEach(t => {
+      html += `<div class="review-item"><div class="review-item-label">${t.label}</div><div class="review-item-value">${trigLabels[c.timing.triggers[t.id] || 'standard']}</div></div>`;
+    });
+    html += `</div></div>`;
+
+    // Weights & Thresholds
+    html += `<div class="review-section"><div class="review-section-title">Weights &amp; Thresholds</div><div class="review-grid">
+      <div class="review-item"><div class="review-item-label">FIT Weight</div><div class="review-item-value">${c.weights.fit}%</div></div>
+      <div class="review-item"><div class="review-item-label">SIGNALS Weight</div><div class="review-item-value">${c.weights.signals}%</div></div>
+      <div class="review-item"><div class="review-item-label">TIMING Weight</div><div class="review-item-value">${c.weights.timing}%</div></div>
+      <div class="review-item"><div class="review-item-label">Tier A</div><div class="review-item-value">&ge; ${c.thresholds.tierA}</div></div>
+      <div class="review-item"><div class="review-item-label">Tier B</div><div class="review-item-value">${c.thresholds.tierB} - ${c.thresholds.tierA - 1}</div></div>
+      <div class="review-item"><div class="review-item-label">Tier C</div><div class="review-item-value">&lt; ${c.thresholds.tierB}</div></div>
+    </div>
+    ${renderTierBar(c.thresholds.tierA, c.thresholds.tierB)}
+    </div>`;
+
+    html += `</div>${seg === 'mfg' ? '<div class="col-divider"></div>' : ''}`;
+    return html;
+  }).join('');
+}
+
+// =====================================================================
+// INTERACTIVE HANDLERS
+// =====================================================================
+
+function setFitRadio(seg, param, value, labelEl) {
+  if (param === 'employee') {
+    config[seg].fit.employeeChoice = value;
+    // Show/hide custom inputs
+    const custom = document.getElementById(seg + '-emp-custom');
+    if (custom) custom.classList.toggle('visible', value === 'custom');
+  } else if (param === 'revenue') {
+    config[seg].fit.revenueChoice = value;
+    const custom = document.getElementById(seg + '-rev-custom');
+    if (custom) custom.classList.toggle('visible', value === 'custom');
+  } else if (param === 'location') {
+    config[seg].fit.locationChoice = value;
+  }
+  // Update selected state for the group
+  const group = labelEl.closest('.radio-group');
+  group.querySelectorAll('.radio-choice').forEach(rc => rc.classList.remove('selected'));
+  labelEl.classList.add('selected');
+}
+
+function setLdTeam(seg, value, labelEl) {
+  config[seg].fit.ldTeamImportance = value;
+  const group = labelEl.closest('.radio-group');
+  group.querySelectorAll('.radio-choice').forEach(rc => rc.classList.remove('selected'));
+  labelEl.classList.add('selected');
+}
+
+function setMaturity(seg, val, btn) {
+  config[seg].fit.ldOrgMaturity = val;
+  const toggle = document.getElementById(seg + '-maturity-toggle');
+  toggle.querySelectorAll('.maturity-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setCompetitorAction(seg, val, btn) {
+  config[seg].signals.competitor = val;
+  const container = document.getElementById(seg + '-competitor-chips');
+  container.querySelectorAll('.action-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setSignalLevel(seg, sigId, level, btn) {
+  config[seg].signals[sigId] = level;
+  const container = document.getElementById(seg + '-sig-' + sigId);
+  container.querySelectorAll('.signal-radio').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setTriggerLevel(seg, triggerId, level, btn) {
+  config[seg].timing.triggers[triggerId] = level;
+  const container = document.getElementById(seg + '-trigger-' + triggerId);
+  container.querySelectorAll('.signal-radio').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function updateSegWeights(seg) {
+  const fit = parseInt(el(seg, 'weight-fit')?.value) || 0;
+  const signals = parseInt(el(seg, 'weight-signals')?.value) || 0;
+  const timing = parseInt(el(seg, 'weight-timing')?.value) || 0;
+  const total = fit + signals + timing;
+
+  config[seg].weights = { fit, signals, timing };
+
+  const fitBar = el(seg, 'weight-bar-fit');
+  const sigBar = el(seg, 'weight-bar-signals');
+  const timBar = el(seg, 'weight-bar-timing');
+  if (fitBar) { fitBar.style.flex = Math.max(fit, 5); fitBar.textContent = `FIT ${fit}%`; }
+  if (sigBar) { sigBar.style.flex = Math.max(signals, 5); sigBar.textContent = `SIGNALS ${signals}%`; }
+  if (timBar) { timBar.style.flex = Math.max(timing, 5); timBar.textContent = `TIMING ${timing}%`; }
+
+  const validation = el(seg, 'weight-validation');
+  if (validation) {
+    if (total === 100) {
+      validation.className = 'weight-validation valid';
+      validation.innerHTML = 'Total: 100 &mdash; Valid';
+    } else {
+      validation.className = 'weight-validation invalid';
+      validation.innerHTML = `Total: ${total} &mdash; Must equal 100 (${total > 100 ? 'over' : 'under'} by ${Math.abs(total - 100)})`;
+    }
+  }
+
+  // Disable Next if either segment invalid
+  checkWeightsValid();
+}
+
+function checkWeightsValid() {
+  const mfgTotal = config.mfg.weights.fit + config.mfg.weights.signals + config.mfg.weights.timing;
+  const finTotal = config.fin.weights.fit + config.fin.weights.signals + config.fin.weights.timing;
+  const valid = mfgTotal === 100 && finTotal === 100;
+  const nextBtn = document.getElementById('weights-next-btn');
+  if (nextBtn) {
+    nextBtn.disabled = !valid;
+    nextBtn.style.opacity = valid ? '' : '0.4';
+    nextBtn.style.pointerEvents = valid ? '' : 'none';
+  }
+}
+
+function updateSegThresholds(seg) {
+  let a = parseInt(el(seg, 'threshold-a')?.value) || 80;
+  let b = parseInt(el(seg, 'threshold-b')?.value) || 60;
+  if (b >= a) { b = a - 1; const bEl = el(seg, 'threshold-b'); if (bEl) bEl.value = b; }
+
+  config[seg].thresholds = { tierA: a, tierB: b };
+
+  const aVal = el(seg, 'threshold-a-value');
+  const bVal = el(seg, 'threshold-b-value');
+  if (aVal) aVal.textContent = a;
+  if (bVal) bVal.textContent = b;
+
+  const barContainer = el(seg, 'tier-bar');
+  if (barContainer) barContainer.innerHTML = renderTierBar(a, b);
+
+  const estimateContainer = el(seg, 'tier-estimate');
+  if (estimateContainer) estimateContainer.innerHTML = renderTierEstimate(seg, a, b);
+}
+
+// =====================================================================
+// SYNC FROM DOM (read custom inputs before navigation)
+// =====================================================================
+
+function syncFromDOM() {
+  // Sync custom employee/revenue inputs if visible
+  ['mfg', 'fin'].forEach(seg => {
+    const empMin = el(seg, 'emp-custom-min');
+    const empMax = el(seg, 'emp-custom-max');
+    if (empMin) config[seg].fit.employeeCustomMin = parseInt(empMin.value) || 3000;
+    if (empMax) config[seg].fit.employeeCustomMax = parseInt(empMax.value) || 10000;
+
+    const revMin = el(seg, 'rev-custom-min');
+    const revMax = el(seg, 'rev-custom-max');
+    if (revMin) config[seg].fit.revenueCustomMin = parseInt(revMin.value) || 1;
+    if (revMax) config[seg].fit.revenueCustomMax = parseInt(revMax.value) || 3;
+
+    // Sync weights if visible
+    const wFit = el(seg, 'weight-fit');
+    const wSig = el(seg, 'weight-signals');
+    const wTim = el(seg, 'weight-timing');
+    if (wFit) config[seg].weights.fit = parseInt(wFit.value) || 33;
+    if (wSig) config[seg].weights.signals = parseInt(wSig.value) || 33;
+    if (wTim) config[seg].weights.timing = parseInt(wTim.value) || 34;
+
+    const tA = el(seg, 'threshold-a');
+    const tB = el(seg, 'threshold-b');
+    if (tA) config[seg].thresholds.tierA = parseInt(tA.value) || 80;
+    if (tB) config[seg].thresholds.tierB = parseInt(tB.value) || 60;
+  });
+}
+
+// =====================================================================
+// UNIVERSE SLIDER HANDLERS
+// =====================================================================
+
+function initUniverseSliders() {
+  const empMin = document.getElementById('universe-emp-min');
+  const empMax = document.getElementById('universe-emp-max');
+  const empFill = document.getElementById('universe-emp-fill');
+  const empDisplay = document.getElementById('universe-emp-display');
+  function updateEmp() {
+    let lo = parseInt(empMin.value), hi = parseInt(empMax.value);
+    if (lo > hi) { if (this === empMin) empMax.value = lo; else empMin.value = hi; lo = parseInt(empMin.value); hi = parseInt(empMax.value); }
+    const range = 25000 - 1000;
+    empFill.style.left = ((lo - 1000) / range * 100) + '%';
+    empFill.style.width = (((hi - lo) / range) * 100) + '%';
+    empDisplay.textContent = fmt(lo) + ' - ' + fmt(hi);
+    universeConfig.employeeMin = lo;
+    universeConfig.employeeMax = hi;
+    applyUniverseFilters();
+  }
+  empMin.addEventListener('input', updateEmp);
+  empMax.addEventListener('input', updateEmp);
+  updateEmp.call(empMin);
+
+  const revMin = document.getElementById('universe-rev-min');
+  const revMax = document.getElementById('universe-rev-max');
+  const revFill = document.getElementById('universe-rev-fill');
+  const revDisplay = document.getElementById('universe-rev-display');
+  const revLabels = ['<$50M', '$50M-$200M', '$200M-$500M', '$500M-$1B', '$1B-$5B', '$5B+'];
+  function updateRev() {
+    let lo = parseInt(revMin.value), hi = parseInt(revMax.value);
+    if (lo > hi) { if (this === revMin) revMax.value = lo; else revMin.value = hi; lo = parseInt(revMin.value); hi = parseInt(revMax.value); }
+    revFill.style.left = (lo / 5 * 100) + '%';
+    revFill.style.width = ((hi - lo) / 5 * 100) + '%';
+    revDisplay.textContent = (lo === 0 && hi === 5) ? 'All revenue ranges' : revLabels[lo] + ' \u2014 ' + revLabels[hi];
+    universeConfig.revenueMin = lo;
+    universeConfig.revenueMax = hi;
+    applyUniverseFilters();
+  }
+  revMin.addEventListener('input', updateRev);
+  revMax.addEventListener('input', updateRev);
+  updateRev.call(revMin);
+
+  const locSlider = document.getElementById('universe-loc-min');
+  const locDisplay = document.getElementById('universe-loc-display');
+  locSlider.addEventListener('input', () => {
+    const val = parseInt(locSlider.value);
+    locDisplay.textContent = val === 0 ? '0+' : val + '+';
+    universeConfig.locationsMin = val;
+    applyUniverseFilters();
+  });
+}
+
+// =====================================================================
+// SUMMARY & EXPORT
+// =====================================================================
+
+function buildSummaryText() {
+  syncFromDOM();
+  const sigLabels = { standard: 'Standard', priority: 'Priority', skip: 'Skip' };
+  const empLabels = { no_distinction: 'No distinction', larger_higher: 'Larger preferred', custom: 'Custom' };
+  const revLabelMap = { no_distinction: 'No distinction', higher_higher: 'Higher preferred', custom: 'Custom' };
+  const locLabels = { no_distinction: 'No distinction', yes_moderate: 'Moderate factor', yes_strong: 'Strong factor' };
+  const ldLabels = ['Not Important', 'Important', 'Very Important'];
+  const trigLabels = { high_priority: 'High Priority', standard: 'Standard', not_relevant: 'Not Relevant' };
+
+  let text = '';
+  for (const seg of ['mfg', 'fin']) {
+    const c = config[seg];
+    const name = seg === 'mfg' ? 'MANUFACTURING' : 'NON-BANKING FINANCE';
+    text += `=== ${name} ===\n\n`;
+
+    if (seg === 'mfg') {
+      text += `UNIVERSE NARROWING\n`;
+      text += `  Employee Range: ${fmt(universeConfig.employeeMin)} - ${fmt(universeConfig.employeeMax)}\n`;
+      text += `  Revenue: ${REVENUE_BRACKETS[universeConfig.revenueMin]?.label || 'All'} to ${REVENUE_BRACKETS[universeConfig.revenueMax]?.label || 'All'}\n`;
+      text += `  Min Locations: ${universeConfig.locationsMin === 0 ? 'No minimum' : universeConfig.locationsMin + '+'}\n`;
+      text += `  Ownership: ${universeConfig.ownership === 'both' ? 'Public & Private' : universeConfig.ownership}\n\n`;
+    }
+
+    text += `FIT PARAMETERS\n`;
+    let empText = empLabels[c.fit.employeeChoice];
+    if (c.fit.employeeChoice === 'custom') empText += `: ${fmt(c.fit.employeeCustomMin)} - ${fmt(c.fit.employeeCustomMax)}`;
+    text += `  Employee: ${empText}\n`;
+    let revText = revLabelMap[c.fit.revenueChoice];
+    if (c.fit.revenueChoice === 'custom') revText += `: ${REV_SWEET_LABELS[c.fit.revenueCustomMin]} - ${REV_SWEET_LABELS[c.fit.revenueCustomMax]}`;
+    text += `  Revenue: ${revText}\n`;
+    text += `  Location Count: ${locLabels[c.fit.locationChoice]}\n`;
+    text += `  L&D Team: ${ldLabels[c.fit.ldTeamImportance]}\n`;
+    text += `  L&D Org Maturity: ${c.fit.ldOrgMaturity}\n\n`;
+
+    text += `SIGNAL PARAMETERS\n`;
+    text += `  Competitor Detection: ${c.signals.competitor === 'auto_tier_a' ? 'Auto Tier A' : c.signals.competitor === 'bonus' ? 'Score Bonus' : 'Flag Only'}\n`;
+    SIGNAL_DEFS.forEach(sig => {
+      text += `  ${sig.label}: ${sigLabels[c.signals[sig.id]]}\n`;
+    });
+
+    text += `\nTIMING PARAMETERS\n`;
+    TIMING_TRIGGERS.forEach(t => {
+      text += `  ${t.label}: ${trigLabels[c.timing.triggers[t.id] || 'standard']}\n`;
+    });
+
+    text += `\nWEIGHTS & THRESHOLDS\n`;
+    text += `  FIT: ${c.weights.fit}%  |  SIGNALS: ${c.weights.signals}%  |  TIMING: ${c.weights.timing}%\n`;
+    text += `  Tier A: >= ${c.thresholds.tierA}  |  Tier B: ${c.thresholds.tierB}-${c.thresholds.tierA - 1}  |  Tier C: < ${c.thresholds.tierB}\n\n`;
+  }
+  return text;
+}
+
+// =====================================================================
+// ACTIONS: COPY, DOWNLOAD, URL, RESET
+// =====================================================================
+
+function copySummary() {
+  const text = buildSummaryText();
+  navigator.clipboard.writeText(text).then(() => showToast('Summary copied to clipboard'));
+}
+
+function downloadConfig() {
+  syncFromDOM();
+  const data = { timestamp: new Date().toISOString(), mfg: config.mfg, fin: config.fin, universe: universeConfig };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `panopto-scoring-config-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Config downloaded');
+}
+
+function copyURL() {
+  encodeState();
+  navigator.clipboard.writeText(window.location.href).then(() => showToast('URL copied to clipboard'));
+}
+
+function encodeState() {
+  syncFromDOM();
+  try {
+    const state = { step: currentStepIndex, mfg: config.mfg, fin: config.fin, uni: universeConfig };
+    window.location.hash = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  } catch (e) { /* silently fail if state too large */ }
+}
+
+function decodeState() {
+  try {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return false;
+    const json = decodeURIComponent(escape(atob(hash)));
+    const state = JSON.parse(json);
+    if (typeof state.step === 'number') currentStepIndex = state.step;
+    // Handle old format (per-segment step index)
+    if (state.step && typeof state.step === 'object') currentStepIndex = 0;
+    if (state.mfg) config.mfg = { ...getDefaults('mfg'), ...state.mfg };
+    if (state.fin) config.fin = { ...getDefaults('fin'), ...state.fin };
+    if (state.uni) universeConfig = { ...universeConfig, ...state.uni };
+    // Backward compat: migrate old slider-based config to choice model
+    ['mfg', 'fin'].forEach(seg => {
+      const c = config[seg];
+      if (c.fit.employeeSweetMin !== undefined && !c.fit.employeeChoice) {
+        c.fit.employeeChoice = 'custom';
+        c.fit.employeeCustomMin = c.fit.employeeSweetMin;
+        c.fit.employeeCustomMax = c.fit.employeeSweetMax;
+      }
+      if (c.fit.revenueSweetMin !== undefined && !c.fit.revenueChoice) {
+        c.fit.revenueChoice = 'custom';
+        c.fit.revenueCustomMin = c.fit.revenueSweetMin;
+        c.fit.revenueCustomMax = c.fit.revenueSweetMax;
+      }
+      if (c.fit.locationImportance !== undefined && !c.fit.locationChoice) {
+        const locMap = { 0: 'no_distinction', 1: 'yes_moderate', 2: 'yes_strong' };
+        c.fit.locationChoice = locMap[c.fit.locationImportance] || 'no_distinction';
+      }
+      // Migrate old signal toggle+dropdown to 3-option model
+      if (c.signals.lms && typeof c.signals.lms === 'object') {
+        c.signals.lms = c.signals.lms.enabled ? (c.signals.lms.importance === 'high' ? 'priority' : 'standard') : 'skip';
+      }
+      if (c.signals.website && typeof c.signals.website === 'object') {
+        c.signals.website = c.signals.website.enabled ? (c.signals.website.importance === 'high' ? 'priority' : 'standard') : 'skip';
+      }
+      if (c.signals.jobs && typeof c.signals.jobs === 'object') {
+        c.signals.jobs = c.signals.jobs.enabled ? (c.signals.jobs.importance === 'high' ? 'priority' : 'standard') : 'skip';
+      }
+      if (c.signals.news && typeof c.signals.news === 'object') {
+        c.signals.news = c.signals.news.enabled ? (c.signals.news.importance === 'high' ? 'priority' : 'standard') : 'skip';
+      }
+      // Migrate old timing triggerOrder to triggers object
+      if (c.timing.triggerOrder && !c.timing.triggers) {
+        c.timing.triggers = {};
+        TIMING_TRIGGERS.forEach(t => { c.timing.triggers[t.id] = 'standard'; });
+      }
+      // Ensure triggers exists
+      if (!c.timing.triggers) {
+        c.timing.triggers = {};
+        TIMING_TRIGGERS.forEach(t => { c.timing.triggers[t.id] = 'standard'; });
+      }
+    });
+    return true;
+  } catch (e) { return false; }
+}
+
+function resetDefaults() {
+  if (!confirm('Reset all settings for both segments to defaults?')) return;
+  config.mfg = getDefaults('mfg');
+  config.fin = getDefaults('fin');
+
+  // Reset universe config
+  universeConfig = {
+    subIndustries: universeConfig.subIndustries.slice(), // preserve discovered sub-industries
+    employeeMin: 1000,
+    employeeMax: 25000,
+    revenueMin: 0,
+    revenueMax: 5,
+    locationsMin: 0,
+    ownership: 'both'
+  };
+
+  // Reset universe DOM elements
+  const empMin = document.getElementById('universe-emp-min');
+  const empMax = document.getElementById('universe-emp-max');
+  const revMin = document.getElementById('universe-rev-min');
+  const revMax = document.getElementById('universe-rev-max');
+  const locMin = document.getElementById('universe-loc-min');
+  if (empMin) { empMin.value = 1000; }
+  if (empMax) { empMax.value = 25000; }
+  if (revMin) { revMin.value = 0; }
+  if (revMax) { revMax.value = 5; }
+  if (locMin) { locMin.value = 0; }
+
+  // Reset display values
+  const empDisplay = document.getElementById('universe-emp-display');
+  const revDisplay = document.getElementById('universe-rev-display');
+  const locDisplay = document.getElementById('universe-loc-display');
+  if (empDisplay) empDisplay.textContent = '1,000 - 25,000';
+  if (revDisplay) revDisplay.textContent = 'All revenue ranges';
+  if (locDisplay) locDisplay.textContent = '0+';
+
+  // Reset slider fills
+  const empFill = document.getElementById('universe-emp-fill');
+  const revFill = document.getElementById('universe-rev-fill');
+  if (empFill) { empFill.style.left = '0%'; empFill.style.width = '100%'; }
+  if (revFill) { revFill.style.left = '0%'; revFill.style.width = '100%'; }
+
+  // Reset ownership buttons
+  document.querySelectorAll('.ownership-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === 'both');
+  });
+
+  // Reset sub-industry checkboxes (check all)
+  document.querySelectorAll('#universe-filters input[type="checkbox"]').forEach(cb => {
+    cb.checked = true;
+  });
+
+  // Re-apply filters with reset values
+  if (universeLoaded) applyUniverseFilters();
+
+  currentStepIndex = 0;
+  showStep('landing');
+  showToast('Reset to defaults');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// =====================================================================
+// INITIALIZATION
+// =====================================================================
+
+function init() {
+  const restored = decodeState();
+  // Init universe sliders
+  initUniverseSliders();
+  // Show current step
+  showStep(STEPS[currentStepIndex]);
+  // Fetch universe data
+  loadMfgUniverse();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
