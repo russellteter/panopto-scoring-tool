@@ -401,7 +401,7 @@ body {
 
 .card-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
 }
 
@@ -1984,8 +1984,9 @@ body {
   </div>
   <div class="header-right">
     <button class="header-btn" onclick="resetDefaults()">Reset Defaults</button>
+    <button class="header-btn" onclick="copyURL()">Copy Shareable URL</button>
     <button class="header-btn" onclick="copySummary()">Copy Summary</button>
-    <button class="header-btn primary" onclick="downloadConfig()">Download Config</button>
+    <button class="header-btn primary" onclick="downloadConfig()">Download</button>
   </div>
 </header>
 
@@ -2084,6 +2085,21 @@ body {
       <div class="col-mfg">
         <h3 class="col-header mfg"><span class="col-dot"></span>Manufacturing</h3>
 
+        <!-- Introduction section -->
+        <div class="info-callout" style="margin-bottom:20px; font-size:16px; line-height:1.6;">
+          <span class="icon">&#x2139;</span>
+          <span>Approx. 4,300 manufacturing accounts match Panopto's ICP account size criteria. There are multiple ways to narrow from 4,300 to ~500 ICP accounts. You can filter by:
+            <ul style="margin:10px 0 10px 20px; list-style:disc;">
+              <li>Employee count</li>
+              <li>Revenue range</li>
+              <li>Number of locations</li>
+              <li>Company type</li>
+              <li>Specific sub-industries</li>
+              <li>Any combination</li>
+            </ul>
+            The total accounts in the data set will adjust below.</span>
+        </div>
+
         <!-- Mfg Universe Funnel -->
         <div class="universe-card card" style="margin-bottom:20px;">
           <div class="card-title">Manufacturing Universe</div>
@@ -2107,30 +2123,13 @@ body {
               <div class="funnel-progress-label">ICP Accounts</div>
             </div>
           </div>
-          <div class="funnel-note">Use the filters below to narrow from 4,300+ to ~500 ICP accounts.</div>
-        </div>
-
-        <!-- Exclusion callout -->
-        <div class="exclusion-callout">
-          <strong>23 Panopto accounts excluded</strong> — 3 open pipeline accounts + 20 existing customer accounts removed at Panopto's request.
-          <span class="exclusion-toggle" onclick="this.nextElementSibling.classList.toggle('visible')">Show details</span>
-          <div class="exclusion-details">
-            <strong>Pipeline (3):</strong> accounts currently in active sales pipeline<br>
-            <strong>Customers (20):</strong> existing Panopto customers already under contract
-          </div>
         </div>
 
         <!-- Live counter -->
         <div class="live-counter sticky" id="universe-counter">
           <span class="count" id="counter-value">--</span>
-          <span class="of-total">of <span id="counter-total">--</span> accounts match</span>
-          <span class="target-indicator" id="counter-target">Target: ~500</span>
-        </div>
-
-        <!-- Data Coverage Dashboard -->
-        <div id="data-coverage-dashboard" class="data-coverage-dashboard" style="display:none;">
-          <div class="data-coverage-title">Data Coverage</div>
-          <div id="coverage-rows"></div>
+          <span class="of-total">of <span id="counter-total">--</span> accounts match your filters</span>
+          <span class="target-indicator" id="counter-target">Goal: ~500</span>
         </div>
 
         <!-- Loading state -->
@@ -2142,17 +2141,12 @@ body {
         <!-- Filter controls (hidden until data loads) -->
         <div id="universe-filters" style="display:none;">
 
-          <div class="info-callout" style="margin-bottom:16px;">
-            <span class="icon">&#x2139;</span>
-            <span>There are multiple ways to narrow from 4,300+ to ~500 ICP accounts. You can filter by employee count, revenue range, number of locations, company type, or specific sub-industries — or any combination. The live counter above tracks your current match count as you adjust.</span>
-          </div>
-
           <!-- Employee Range -->
           <div class="card">
             <div class="card-header-bar">Employee Count Range</div>
             <div class="control-group">
               <div class="control-label">Filter accounts by employee count</div>
-              <div class="control-hint">ICP range: 1,000 - 25,000 employees. Source: ZoomInfo employee count.</div>
+              <div class="control-hint">ICP range: 1,000 – 25,000 employees. Source: ZoomInfo employee count.</div>
               <div class="dual-slider" id="universe-emp-slider">
                 <div class="range-display" id="universe-emp-display">1,000 - 25,000</div>
                 <div class="track"></div>
@@ -2172,7 +2166,7 @@ body {
             <div class="card-header-bar">Revenue Range</div>
             <div class="control-group">
               <div class="control-label">Filter accounts by annual revenue</div>
-              <div class="control-hint">Source: ZoomInfo reported annual revenue.</div>
+              <div class="control-hint">Filter by annual revenue bracket. Source: ZoomInfo reported annual revenue.</div>
               <div class="bracket-slider" id="universe-rev-slider">
                 <div class="range-display" id="universe-rev-display">All revenue ranges</div>
                 <div class="track-container">
@@ -2204,7 +2198,7 @@ body {
                   <span id="universe-loc-display" style="font-family:'Instrument Sans'; font-size:16px; font-weight:700; color:var(--teal-deep); min-width:60px; text-align:right; font-variant-numeric:tabular-nums;">0+</span>
                 </div>
                 <div class="control-label" style="margin-top:4px; font-size:16px;">locations</div>
-                <div class="control-hint" style="margin-top:8px;">Set to 0 to include all accounts regardless of location count. Source: ZoomInfo location count.</div>
+                <div class="control-hint" style="margin-top:8px;">Set to 0 to include all accounts regardless of location count. Note: ~44% of accounts have location count data. Accounts without data are handled by the toggle below.</div>
                 <div class="control-label" style="font-size:14px; margin-top:8px;">Accounts with no location data:</div>
                 <div class="unknown-toggle" id="unknown-loc-toggle">
                   <button class="unknown-toggle-btn active" data-value="include" onclick="setUnknownHandling('locations', 'include', this)">Include</button>
@@ -2218,7 +2212,7 @@ body {
               <div class="card-header-bar">Company Type</div>
               <div class="control-group">
                 <div class="control-label">Include:</div>
-                <div class="control-hint">Source: ZoomInfo company type classification.</div>
+                <div class="control-hint">Filter by public or private company type.</div>
                 <div class="ownership-toggle" style="margin-top:8px;">
                   <button class="ownership-btn active" data-value="both" onclick="setOwnership('both', this)">Both<span class="btn-count" id="own-count-both">--</span></button>
                   <button class="ownership-btn" data-value="public" onclick="setOwnership('public', this)">Public<span class="btn-count" id="own-count-public">--</span></button>
@@ -2240,7 +2234,7 @@ body {
           <!-- Sub-Industry Selection -->
           <div class="card">
             <div class="card-header-bar">Sub-Industry Selection</div>
-            <div class="card-description">Select specific sub-industries to include. Accounts from unchecked sub-industries will be excluded. Classifications are based on ZoomInfo industry and sub-industry fields.</div>
+            <div class="card-description">Select which manufacturing sub-industries to include. Unchecking a sub-industry removes all its accounts from the scoring run.</div>
 
             <div class="filter-section">
               <div class="filter-section-title">Top Ten Sub-Industries by Total Accounts</div>
@@ -2253,6 +2247,16 @@ body {
               <div class="filter-section-title">All Other Sub-Industries</div>
               <div id="grouped-subs"></div>
             </div>
+          </div>
+        </div>
+
+        <!-- Exclusion callout -->
+        <div class="exclusion-callout" style="margin-top:20px;">
+          <strong>23 Panopto accounts excluded</strong> — 3 open pipeline accounts + 20 existing customer accounts removed at Panopto's request.
+          <span class="exclusion-toggle" onclick="this.nextElementSibling.classList.toggle('visible')">Show details</span>
+          <div class="exclusion-details">
+            <strong>Pipeline (3):</strong> accounts currently in active sales pipeline<br>
+            <strong>Customers (20):</strong> existing Panopto customers already under contract
           </div>
         </div>
 
@@ -2279,7 +2283,7 @@ body {
             <div class="funnel-progress-step completed">
               <div class="funnel-step-dot">&#10003;</div>
               <div class="funnel-progress-value">1,006</div>
-              <div class="funnel-progress-label">1K-10K, excl. Banking</div>
+              <div class="funnel-progress-label">1K–10K Employees<br>Excluding Banking</div>
             </div>
             <div class="funnel-progress-connector completed"></div>
             <div class="funnel-progress-step completed">
@@ -2461,10 +2465,14 @@ body {
 
     <div class="spacer"></div>
 
-    <div class="card" style="background: var(--teal-deep); border:none; color:white; max-width:700px; margin:0 auto;">
-      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-        <button class="btn" style="background:var(--teal-primary); color:var(--teal-deep); font-weight:700;" onclick="copySummary()">Copy Summary</button>
-        <button class="btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);" onclick="downloadConfig()">Download Config JSON</button>
+    <div class="card" style="background: var(--teal-deep); border:none; color:white; max-width:700px; margin:0 auto; text-align:center;">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:16px; color:rgba(255,255,255,0.7); font-family:'Instrument Sans'; margin-bottom:12px;">When you're done, submit your selections. This copies a shareable link and opens an email to send to Locality AI.</div>
+        <button class="btn" style="background:var(--teal-primary); color:var(--teal-deep); font-weight:700; font-size:17px; padding:12px 32px;" onclick="submitSelections()">Submit Selections</button>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,0.15); padding-top:14px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center;">
+        <button class="btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);" onclick="copySummary()">Copy Summary</button>
+        <button class="btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);" onclick="downloadConfig()">Download</button>
         <button class="btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);" onclick="copyURL()">Copy Shareable URL</button>
       </div>
       <div style="margin-top:10px; font-size:15px; color:rgba(255,255,255,0.5); font-family:'Instrument Sans';">Share this URL with anyone — it encodes all configuration in the link and restores the exact same settings.</div>
@@ -2661,6 +2669,24 @@ function parseRevenue(raw) {
 function fmt(n) { return n.toLocaleString('en-US'); }
 function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
+function animateCounter(target) {
+  const el = document.getElementById('counter-value');
+  const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
+  if (current === target) return;
+  const duration = 400;
+  const start = performance.now();
+  const diff = target - current;
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const val = Math.round(current + diff * eased);
+    el.textContent = fmt(val);
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 // =====================================================================
 // GOOGLE SHEETS DATA FETCH
 // =====================================================================
@@ -2727,7 +2753,6 @@ async function loadMfgUniverse() {
     loading.style.display = 'none';
     filters.style.display = 'block';
     buildUniverseFilters(data);
-    buildDataCoverageDashboard(data);
     syncOwnershipDOM();
     syncUnknownHandlingDOM();
     applyUniverseFilters();
@@ -2740,7 +2765,6 @@ async function loadMfgUniverse() {
     subIndustryMedians = computeSubIndustryMedians(fallbackData);
     filters.style.display = 'block';
     buildUniverseFilters(fallbackData);
-    buildDataCoverageDashboard(fallbackData);
     syncOwnershipDOM();
     syncUnknownHandlingDOM();
     applyUniverseFilters();
@@ -3147,7 +3171,7 @@ function applyUniverseFilters() {
   if (cfg.ownership === 'weighted') {
     count = Math.round(pubPass * cfg.ownershipMix / 100) + Math.round(privPass * (100 - cfg.ownershipMix) / 100) + otherPass;
   }
-  document.getElementById('counter-value').textContent = fmt(count);
+  animateCounter(count);
   document.getElementById('counter-total').textContent = fmt(total);
 
   // Show breakdown if any estimates are in use
@@ -3169,9 +3193,9 @@ function applyUniverseFilters() {
 
   const target = document.getElementById('counter-target');
   const pct = Math.abs(count - 500) / 500;
-  if (pct <= 0.1) { target.className = 'target-indicator target-green'; target.textContent = `${fmt(count)} ~ Target: ~500`; }
-  else if (pct <= 0.25) { target.className = 'target-indicator target-yellow'; target.textContent = `Target: ~500`; }
-  else { target.className = 'target-indicator target-yellow'; target.textContent = `Target: ~500`; }
+  if (pct <= 0.1) { target.className = 'target-indicator target-green'; target.textContent = `${fmt(count)} ~ Goal: ~500`; }
+  else if (pct <= 0.25) { target.className = 'target-indicator target-yellow'; target.textContent = `Goal: ~500`; }
+  else { target.className = 'target-indicator target-yellow'; target.textContent = `Goal: ~500`; }
 
   // Gate Continue button: enable only when count is within 25% of 500 (375-625)
   const continueBtn = document.getElementById('universe-continue-btn');
@@ -4061,6 +4085,19 @@ function downloadConfig() {
 function copyURL() {
   encodeState();
   navigator.clipboard.writeText(window.location.href).then(() => showToast('URL copied to clipboard'));
+}
+
+function submitSelections() {
+  encodeState();
+  const url = window.location.href;
+  const subject = encodeURIComponent('Panopto ICP Scoring Tool — My Selections');
+  const body = encodeURIComponent('Here are my scoring tool selections:\n\n' + url + '\n\nOpen this link to see the exact configuration I chose.');
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('URL copied — opening email...');
+    setTimeout(() => {
+      window.open('mailto:russell@localityai.com?subject=' + subject + '&body=' + body, '_self');
+    }, 500);
+  });
 }
 
 function encodeState() {
