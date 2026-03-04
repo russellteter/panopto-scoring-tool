@@ -1100,6 +1100,14 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Revenue distribution table */
+.rev-dist-table { margin-top: 12px; width: 100%; border-collapse: collapse; }
+.rev-dist-table td { padding: 2px 0; font-family: 'Instrument Sans', sans-serif; font-size: 12px; vertical-align: middle; }
+.rev-dist-table td:first-child { color: var(--text-muted); width: 100px; white-space: nowrap; }
+.rev-dist-table td:nth-child(2) { width: 100%; padding: 0 8px; }
+.rev-dist-table td:last-child { color: var(--text-secondary); font-weight: 600; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rev-dist-bar { height: 4px; border-radius: 2px; background: var(--teal-primary); transition: width 0.4s ease; }
+
 /* ================================================================
    UNKNOWN-HANDLING TOGGLE (segmented control)
    ================================================================ */
@@ -2183,6 +2191,7 @@ body {
                   <span>$1B</span>
                   <span>$5B+</span>
                 </div>
+                <div id="rev-distribution"></div>
               </div>
             </div>
           </div>
@@ -2754,6 +2763,7 @@ async function loadMfgUniverse() {
     loading.style.display = 'none';
     filters.style.display = 'block';
     buildUniverseFilters(data);
+    buildRevenueDistribution(data);
     syncOwnershipDOM();
     syncUnknownHandlingDOM();
     applyUniverseFilters();
@@ -2766,6 +2776,7 @@ async function loadMfgUniverse() {
     subIndustryMedians = computeSubIndustryMedians(fallbackData);
     filters.style.display = 'block';
     buildUniverseFilters(fallbackData);
+    buildRevenueDistribution(fallbackData);
     syncOwnershipDOM();
     syncUnknownHandlingDOM();
     applyUniverseFilters();
@@ -2977,6 +2988,38 @@ function computeSubIndustryMedians(data) {
     };
   }
   return result;
+}
+
+// =====================================================================
+// REVENUE DISTRIBUTION TABLE
+// =====================================================================
+
+function buildRevenueDistribution(data) {
+  const container = document.getElementById('rev-distribution');
+  if (!container) return;
+  const revCol = findColumn(data, 'revenue');
+  if (revCol === undefined) return;
+
+  const buckets = REVENUE_BRACKETS.map(b => ({ label: b.label, count: 0 }));
+  const noData = { label: 'No data', count: 0 };
+  const total = data.length;
+
+  data.forEach(row => {
+    const rev = parseRevenue(row[revCol]);
+    if (!rev) { noData.count++; return; }
+    for (let i = 0; i < REVENUE_BRACKETS.length; i++) {
+      if (rev >= REVENUE_BRACKETS[i].min && rev < REVENUE_BRACKETS[i].max) { buckets[i].count++; return; }
+    }
+  });
+
+  const all = [noData, ...buckets];
+  const maxCount = Math.max(...all.map(b => b.count), 1);
+
+  container.innerHTML = '<table class="rev-dist-table">' + all.map(b => {
+    const pct = total > 0 ? (b.count / total * 100) : 0;
+    const barW = (b.count / maxCount * 100).toFixed(1);
+    return `<tr><td>${b.label}</td><td><div class="rev-dist-bar" style="width:${barW}%"></div></td><td>${fmt(b.count)} (${pct.toFixed(1)}%)</td></tr>`;
+  }).join('') + '</table>';
 }
 
 // =====================================================================
