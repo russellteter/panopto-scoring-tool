@@ -1106,7 +1106,11 @@ body {
 .rev-dist-table td:first-child { color: var(--text-muted); width: 100px; white-space: nowrap; }
 .rev-dist-table td:nth-child(2) { width: 100%; padding: 0 8px; }
 .rev-dist-table td:last-child { color: var(--text-secondary); font-weight: 600; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.rev-dist-bar { height: 4px; border-radius: 2px; background: var(--teal-primary); transition: width 0.4s ease; }
+.rev-dist-bar { height: 4px; border-radius: 2px; background: var(--teal-primary); transition: width 0.4s ease; min-width: 2px; }
+@media (max-width: 480px) {
+  .rev-dist-table td:first-child { width: 70px; font-size: 11px; }
+  .rev-dist-table td:last-child { font-size: 11px; }
+}
 
 /* ================================================================
    UNKNOWN-HANDLING TOGGLE (segmented control)
