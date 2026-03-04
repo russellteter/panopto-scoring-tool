@@ -3130,7 +3130,7 @@ function applyUniverseFilters() {
         pass = false;
       }
     }
-    if (pass && locCol && cfg.locationsMin > 0) {
+    if (pass && locCol) {
       const loc = parseInt(String(row[locCol]).replace(/,/g, '')) || 0;
       if (loc === 0) {
         if (handling.locations === 'exclude') {
